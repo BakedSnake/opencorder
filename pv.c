@@ -7,8 +7,9 @@
 #include <spa/param/audio/format-utils.h>
 #include <pipewire/pipewire.h>
 #include <sndfile.h>
+#include <raylib.h>
 
-static char version[5] = "0.0.2";
+static char version[5] = "0.0.3";
 
 static struct option options[] = {
   {"help",              no_argument, 		0, 'h'},
@@ -17,6 +18,7 @@ static struct option options[] = {
   {"rate",		required_argument, 	0, 'r'},
   {"output", 		required_argument, 	0, 'o'},
   {"target", 		required_argument, 	0, 't'},
+  {"gui", 		no_argument, 	        0, 'g'},
   {0, 			0, 			0,  0 }
 };
 
@@ -49,9 +51,11 @@ static void on_process(void *userdata)
 
         n_channels = data->format.info.raw.channels;
         n_samples = buf->datas[0].chunk->size / sizeof(float);
+
         /* move cursor up */
         if (data->move)
                 fprintf(stdout, "%c[%dA", 0x1b, n_channels + 1);
+
         fprintf(stdout, "\n");
         for (c = 0; c < data->format.info.raw.channels; c++) {
                 max = 0.0f;
@@ -121,6 +125,25 @@ static void do_quit(void *userdata, int signal_number)
         pw_main_loop_quit(data->loop);
 }
 
+void drawVolumeMeters()
+{
+        DrawRectangle(550, 20, 30, 310, RED);
+        DrawRectangle(500, 20, 30, 310, RED);
+}
+
+void guiStart()
+{
+        InitWindow(600, 350, "frecorder");
+        SetTargetFPS(60);
+
+        BeginDrawing();
+        ClearBackground(BLACK);
+        DrawRectangle(20, 20, 425, 150, ORANGE);
+        DrawRectangleLines(20, 20, 425, 150, WHITE);
+        drawVolumeMeters();
+        EndDrawing();
+}
+
 int main(int argc, char *argv[])
 {
         int opt;
@@ -128,7 +151,7 @@ int main(int argc, char *argv[])
 	char* streamTarget = NULL;
 	char* path = NULL;
 
-        while ((opt = getopt_long(argc, argv, "hvfrot:", options, NULL)) != -1) {
+        while ((opt = getopt_long(argc, argv, "hvfrotg:", options, NULL)) != -1) {
                 switch (opt) {
                         case 'h':
                                 printf("Usage: ...\n");
@@ -136,6 +159,9 @@ int main(int argc, char *argv[])
                         case 'v':
                                 printf("Version: %s\n", version);
                                 return 0;
+                        case 'g':
+                                guiStart();
+                                drawVolumeMeters();
                         case 'o':
                                 path = optarg;
                                 break;
