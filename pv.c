@@ -28,7 +28,7 @@ static struct option options[] = {
   {0,                   0,                      0,  0 }
 };
 
-struct data {
+typedef struct data {
         struct pw_main_loop *loop;
         struct pw_stream *stream;
 
@@ -36,7 +36,7 @@ struct data {
         unsigned move:1;
         SNDFILE *sf;
         char *sfName;
-};
+} data;
 
 typedef struct pipeData {
         struct data dat;
@@ -147,6 +147,26 @@ static void do_quit(void *userdata, int signal_number)
         pw_main_loop_quit(data->loop);
 }
 
+void drawInfo(data data, SF_INFO sfinfo)
+{
+        char* filename = data.sfName;
+        DrawText(filename, 25, 25, 14, BLACK);
+
+        char rate[9];
+        snprintf(rate, 9, "%d Hz", sfinfo.samplerate);
+        DrawText(rate, 25, 45, 14, BLACK);
+
+        char master[7];
+        int chans = sfinfo.channels;
+        if (chans == 2)
+                snprintf(master, 7, "%s", "Stereo");
+
+        if (chans == 1)
+                snprintf(master, 7, "%s", "Mono  ");
+
+        DrawText(master, 25, 65, 14, BLACK);
+}
+
 void drawVolumeMeters()
 {
         DrawRectangle(550, 20, 30, 305, RED);
@@ -156,13 +176,15 @@ void drawVolumeMeters()
         float rightFull = SAMPLE_RIGHT * 305;
 
         for (size_t j = 0; j < (305); ++j) {
-          if (j < leftFull)
-            DrawRectangle(WIDTH-100, 325-j, 30, 1, GREEN);
+                if (j < leftFull)
+                        DrawRectangle(WIDTH-100, 325-j, 30, 1, GREEN);
 
-          if (j < rightFull)
-            DrawRectangle(WIDTH-50, 325-j, 30, 1, GREEN);
+                if (j < rightFull)
+                        DrawRectangle(WIDTH-50, 325-j, 30, 1, GREEN);
         }
 
+        DrawRectangleLines(550, 20, 30, 305, WHITE);
+        DrawRectangleLines(500, 20, 30, 305, WHITE);
 }
 
 void drawVolumeValues()
@@ -185,7 +207,7 @@ void* piper(void* arg)
         pipeData *pdPtr = (pipeData*)arg;
         // Use a pointer to the shared pipeData so the thread owns its lifetime
         // and we can clean it up when done.
-        struct data data = pdPtr->dat;
+        data data = pdPtr->dat;
         char* streamTarget = pdPtr->target;
         int argc = pdPtr->argc;
         const struct spa_pod *params[1];
@@ -218,7 +240,6 @@ void* piper(void* arg)
         if (argc > 1 && streamTarget != NULL)
                 /* Set stream target if given on command line */
                 pw_properties_set(props, PW_KEY_TARGET_OBJECT, streamTarget);
-
         /* uncomment if you want to capture from the sink monitor ports */
         /* pw_properties_set(props, PW_KEY_STREAM_CAPTURE_SINK, "true"); */
 
@@ -342,6 +363,7 @@ int main(int argc, char *argv[])
                 ClearBackground(BLACK);
                 DrawRectangle(20, 20, 425, 150, ORANGE);
                 DrawRectangleLines(20, 20, 425, 150, WHITE);
+                drawInfo(data, sfinfo);
                 drawVolumeMeters();
                 drawVolumeValues();
                 EndDrawing();
