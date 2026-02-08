@@ -147,14 +147,35 @@ static void do_quit(void *userdata, int signal_number)
         pw_main_loop_quit(data->loop);
 }
 
+void drawheader()
+{
+        DrawRectangle(23, 23, 85, 18, LIGHTGRAY);
+        DrawRectangleLines(23, 23, 85, 18, BLACK);
+        DrawText("File name", 25, 25, 14, BLACK);
+        DrawRectangle(23, 41, 85, 18, LIGHTGRAY);
+        DrawRectangleLines(23, 41, 85, 18, BLACK);
+        DrawText("Sample rate", 25, 43, 14, BLACK);
+        DrawRectangle(23, 59, 85, 18, LIGHTGRAY);
+        DrawRectangleLines(23, 59, 85, 18, BLACK);
+        DrawText("Master", 25, 62, 14, BLACK);
+
+        DrawRectangle(107, 23, 135, 18, BLACK);
+        DrawRectangleLines(107, 23, 135, 18, BEIGE);
+        DrawRectangle(107, 41, 135, 18, BLACK);
+        DrawRectangleLines(107, 41, 135, 18, BEIGE);
+        DrawRectangle(107, 59, 135, 18, BLACK);
+        DrawRectangleLines(107, 59, 135, 18, BEIGE);
+}
+
 void drawInfo(data data, SF_INFO sfinfo)
 {
+        drawheader();
         char* filename = data.sfName;
-        DrawText(filename, 25, 25, 14, BLACK);
+        DrawText(filename, 115, 25, 14, BEIGE);
 
         char rate[9];
         snprintf(rate, 9, "%d Hz", sfinfo.samplerate);
-        DrawText(rate, 25, 45, 14, BLACK);
+        DrawText(rate, 115, 43, 14, BEIGE);
 
         char master[7];
         int chans = sfinfo.channels;
@@ -164,7 +185,7 @@ void drawInfo(data data, SF_INFO sfinfo)
         if (chans == 1)
                 snprintf(master, 7, "%s", "Mono  ");
 
-        DrawText(master, 25, 65, 14, BLACK);
+        DrawText(master, 115, 62, 14, BEIGE);
 }
 
 void drawVolumeMeters()
