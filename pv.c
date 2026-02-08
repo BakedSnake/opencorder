@@ -1,25 +1,31 @@
+#include <pipewire-0.3/pipewire/thread-loop.h>
+#include <sched.h>
 #include <stdio.h>
 #include <getopt.h>
 #include <math.h>
 #include <signal.h>
 #include <sys/stat.h>
+#include <pthread.h>
 
 #include <spa/param/audio/format-utils.h>
 #include <pipewire/pipewire.h>
 #include <sndfile.h>
 #include <raylib.h>
 
+#define WIDTH 600
+#define HEIGHT 350
+
 static char version[5] = "0.0.3";
 
 static struct option options[] = {
-  {"help",              no_argument, 		0, 'h'},
-  {"version",           no_argument, 		0, 'v'},
-  {"format",            required_argument, 	0, 'f'},
-  {"rate",		required_argument, 	0, 'r'},
-  {"output", 		required_argument, 	0, 'o'},
-  {"target", 		required_argument, 	0, 't'},
-  {"gui", 		no_argument, 	        0, 'g'},
-  {0, 			0, 			0,  0 }
+  {"help",              no_argument,            0, 'h'},
+  {"version",           no_argument,            0, 'v'},
+  {"format",            required_argument,      0, 'f'},
+  {"rate",              required_argument,      0, 'r'},
+  {"output",            required_argument,      0, 'o'},
+  {"target",            required_argument,      0, 't'},
+  {"gui",               no_argument,            0, 'g'},
+  {0,                   0,                      0,  0 }
 };
 
 struct data {
@@ -29,8 +35,19 @@ struct data {
         struct spa_audio_info format;
         unsigned move:1;
         SNDFILE *sf;
-	char *sfName;
+        char *sfName;
 };
+
+typedef struct pipeData {
+        struct data dat;
+        char* target;
+        int argc;
+} pipeData;
+
+float SAMPLE_LEFT;
+float SAMPLE_RIGHT;
+pthread_t guiThread;
+pthread_t pipeThread;
 
 static void on_process(void *userdata)
 {
@@ -63,22 +80,27 @@ static void on_process(void *userdata)
                         max = fmaxf(max, fabsf(samples[n]));
                 }
 
+                SAMPLE_LEFT = c == 0 ? samples[0] : SAMPLE_LEFT;
+                SAMPLE_RIGHT = c == 1 ? samples[1] : SAMPLE_RIGHT;
 
-                peak = (uint32_t)SPA_CLAMPF(max * 30, 0.f, 39.f);
+                //peak = (uint32_t)SPA_CLAMPF(max * 30, 0.f, 39.f);
 
-                fprintf(stdout, "channel %d: |%*s%*s| peak:%f\n",
-                                c, peak+1, "*", 40 - peak, "", max);
+                /*fprintf(stdout, "channel %d: |%*s%*s| peak:%f\n",
+                                c, peak+1, "*", 40 - peak, "", max);*/
         }
 
         // Write sample data (total nr samples) to file.
         sf_write_float(data->sf, samples, n_samples);
 
         // Keep track of file size.
+        long fsize = 0;
         FILE *file = fopen(data->sfName, "r");
-        fseek(file, 0, SEEK_END);
-        long fsize = ftell(file);
-        fprintf(stdout, "File: %s | %ld bytes", data->sfName, fsize);
-        rewind(file);
+        if (file != NULL) {
+                fseek(file, 0, SEEK_END);
+                fsize = ftell(file);
+                fclose(file);
+        }
+        //fprintf(stdout, "File: %s | %ld bytes", data->sfName, fsize);
 
         data->move = true;
         fflush(stdout);
@@ -108,8 +130,8 @@ on_stream_param_changed(void *_data, uint32_t id, const struct spa_pod *param)
         /* call a helper function to parse the format for us. */
         spa_format_audio_raw_parse(param, &data->format.info.raw);
 
-        fprintf(stdout, "source rate:%d channels:%d\n",
-                        data->format.info.raw.rate, data->format.info.raw.channels);
+        /*fprintf(stdout, "source rate:%d channels:%d\n",
+                        data->format.info.raw.rate, data->format.info.raw.channels);*/
 
 }
 
@@ -127,76 +149,49 @@ static void do_quit(void *userdata, int signal_number)
 
 void drawVolumeMeters()
 {
-        DrawRectangle(550, 20, 30, 310, RED);
-        DrawRectangle(500, 20, 30, 310, RED);
-}
+        DrawRectangle(550, 20, 30, 305, RED);
+        DrawRectangle(500, 20, 30, 305, RED);
 
-void guiStart()
-{
-        InitWindow(600, 350, "frecorder");
-        SetTargetFPS(60);
+        float leftFull = SAMPLE_LEFT * 305;
+        float rightFull = SAMPLE_RIGHT * 305;
 
-        BeginDrawing();
-        ClearBackground(BLACK);
-        DrawRectangle(20, 20, 425, 150, ORANGE);
-        DrawRectangleLines(20, 20, 425, 150, WHITE);
-        drawVolumeMeters();
-        EndDrawing();
-}
+        for (size_t j = 0; j < (305); ++j) {
+          if (j < leftFull)
+            DrawRectangle(WIDTH-100, 325-j, 30, 1, GREEN);
 
-int main(int argc, char *argv[])
-{
-        int opt;
-	char* rateStr = NULL;
-	char* streamTarget = NULL;
-	char* path = NULL;
-
-        while ((opt = getopt_long(argc, argv, "hvfrotg:", options, NULL)) != -1) {
-                switch (opt) {
-                        case 'h':
-                                printf("Usage: ...\n");
-                                return 0;
-                        case 'v':
-                                printf("Version: %s\n", version);
-                                return 0;
-                        case 'g':
-                                guiStart();
-                                drawVolumeMeters();
-                        case 'o':
-                                path = optarg;
-                                break;
-                        case 'r':
-                                rateStr = optarg;
-                        case 't':
-                                streamTarget = optarg;
-                        case '?':
-                                default:
-                                break;
-                }
+          if (j < rightFull)
+            DrawRectangle(WIDTH-50, 325-j, 30, 1, GREEN);
         }
 
-        struct data data = { 0, };
+}
+
+void drawVolumeValues()
+{
+        char* left = malloc(sizeof(SAMPLE_LEFT));
+        char* right = malloc(sizeof(SAMPLE_RIGHT));
+
+        snprintf(left, sizeof(SAMPLE_LEFT)+1, "%.2f", SAMPLE_LEFT);
+        snprintf(right, sizeof(SAMPLE_RIGHT)+1, "%.2f", SAMPLE_RIGHT);
+
+        DrawText(left, 505, 330, 14, RED);
+        DrawText(right, 555, 330, 14, RED);
+
+        free(left);
+        free(right);
+}
+
+void* piper(void* arg)
+{
+        pipeData *pdPtr = (pipeData*)arg;
+        // Use a pointer to the shared pipeData so the thread owns its lifetime
+        // and we can clean it up when done.
+        struct data data = pdPtr->dat;
+        char* streamTarget = pdPtr->target;
+        int argc = pdPtr->argc;
         const struct spa_pod *params[1];
         uint8_t buffer[1024];
         struct pw_properties *props;
         struct spa_pod_builder b = SPA_POD_BUILDER_INIT(buffer, sizeof(buffer));
-
-        data.sfName = path != NULL ? path : "out-recording.wav";
-        const int channels = 2;
-        const int samplerate = rateStr != NULL ? atoi(rateStr) : 48000;
-        const int frames = samplerate;
-
-        SF_INFO sfinfo = {0};
-        sfinfo.samplerate = samplerate;
-        sfinfo.channels = channels;
-        sfinfo.format = SF_FORMAT_WAV | SF_FORMAT_PCM_32;
-        data.sf = sf_open(data.sfName, SFM_WRITE, &sfinfo);
-        if (!data.sf) {
-            fprintf(stderr, "Error opening file: %s\n", sf_strerror(NULL));
-            return 1;
-        }
-
-        pw_init(&argc, &argv);
 
         /* make a main loop. If you already have another main loop, you can add
          * the fd of this pipewire mainloop to it. */
@@ -255,9 +250,108 @@ int main(int argc, char *argv[])
         /* and wait while we let things run */
         pw_main_loop_run(data.loop);
 
+        /* Cleanup resources owned by this thread. This is done here to ensure
+         * the thread fully finishes its work before the thread exits. */
+        if (data.stream) {
+                pw_stream_destroy(data.stream);
+        }
+        if (data.loop) {
+                pw_main_loop_destroy(data.loop);
+        }
+        /* Note: sf handle closing is managed by the thread if used. */
+
+        /* Free the thread-allocated pipeData struct. */
+        free(pdPtr);
+
+        return NULL;
+}
+
+int main(int argc, char *argv[])
+{
+        int opt;
+        char* rateStr = NULL;
+        char* streamTarget = NULL;
+        char* path = NULL;
+        int rc;
+
+        /* while ((opt = getopt_long(argc, argv, "hvfrotg:", options, NULL)) != -1) {
+                switch (opt) {
+                        case 'h':
+                                printf("Usage: ...\n");
+                                return 0;
+                        case 'v':
+                                printf("Version: %s\n", version);
+                                return 0;
+                        case 'g':
+                                rc = pthread_create(&guiThread, NULL, guiStart, NULL);
+                                if (rc < 0) {
+                                        fprintf(stdout, "\n");
+                                        return 1;
+                                }
+                                break;
+                        case 'o':
+                                path = optarg;
+                                break;
+                        case 'r':
+                                rateStr = optarg;
+                                break;
+                        case 't':
+                                streamTarget = optarg;
+                                break;
+                        case '?':
+                                default:
+                                break;
+                }
+        }*/
+
+        struct data data = { 0, };
+
+        data.sfName = path != NULL ? path : "out-recording.wav";
+        const int channels = 2;
+        const int samplerate = rateStr != NULL ? atoi(rateStr) : 48000;
+        const int frames = samplerate;
+
+        SF_INFO sfinfo = {0};
+        sfinfo.samplerate = samplerate;
+        sfinfo.channels = channels;
+        sfinfo.format = SF_FORMAT_WAV | SF_FORMAT_PCM_32;
+        data.sf = sf_open(data.sfName, SFM_WRITE, &sfinfo);
+        if (!data.sf) {
+            fprintf(stderr, "Error opening file: %s\n", sf_strerror(NULL));
+            return 1;
+        }
+
+        InitWindow(600, 350, "frecorder");
+        SetTargetFPS(60);
+
+        BeginDrawing();
+
+        pw_init(&argc, &argv);
+        pipeData *pd = malloc(sizeof(pipeData));
+        pd->dat = data;
+        pd->target = streamTarget;
+        pd->argc = argc;
+        rc = pthread_create(&pipeThread, NULL, piper, pd);
+        if (rc < 0) {
+                fprintf(stdout, "\n");
+                free(pd);
+                return 1;
+        }
+
+        while (!WindowShouldClose()) {
+                ClearBackground(BLACK);
+                DrawRectangle(20, 20, 425, 150, ORANGE);
+                DrawRectangleLines(20, 20, 425, 150, WHITE);
+                drawVolumeMeters();
+                drawVolumeValues();
+                EndDrawing();
+        }
+
+
+        pthread_detach(guiThread);
+        pthread_join(pipeThread, NULL);
         pw_stream_destroy(data.stream);
         pw_main_loop_destroy(data.loop);
         pw_deinit();
-
         return 0;
 }
