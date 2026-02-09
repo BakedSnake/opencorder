@@ -223,6 +223,13 @@ void drawVolumeValues()
         free(right);
 }
 
+void drawControls(Texture2D stopTrack, Texture2D armTrack, Texture2D recTrack)
+{
+        DrawTextureEx(stopTrack, (Vector2){25, HEIGHT - 60}, .0f, .75f, WHITE);
+        DrawTextureEx(armTrack, (Vector2){72, HEIGHT - 60}, .0f, .75f, WHITE);
+        DrawTextureEx(recTrack, (Vector2){119, HEIGHT - 60}, .0f, .75f, WHITE);
+}
+
 void* piper(void* arg)
 {
         pipeData *pdPtr = (pipeData*)arg;
@@ -366,7 +373,9 @@ int main(int argc, char *argv[])
         InitWindow(600, 350, "frecorder");
         SetTargetFPS(60);
 
-        BeginDrawing();
+        Texture2D armTrack = LoadTexture("./assets/arm-track.png");
+        Texture2D recTrack = LoadTexture("./assets/play.png");
+        Texture2D stopTrack = LoadTexture("./assets/stop-track.png");
 
         pw_init(&argc, &argv);
         pipeData *pd = malloc(sizeof(pipeData));
@@ -381,12 +390,14 @@ int main(int argc, char *argv[])
         }
 
         while (!WindowShouldClose()) {
+                BeginDrawing();
                 ClearBackground(BLACK);
                 DrawRectangle(20, 20, 425, 150, ORANGE);
                 DrawRectangleLines(20, 20, 425, 150, WHITE);
                 drawInfo(data, sfinfo);
                 drawVolumeMeters();
                 drawVolumeValues();
+                drawControls(stopTrack, armTrack, recTrack);
                 EndDrawing();
         }
 
@@ -396,5 +407,9 @@ int main(int argc, char *argv[])
         pw_stream_destroy(data.stream);
         pw_main_loop_destroy(data.loop);
         pw_deinit();
+        UnloadTexture(stopTrack);
+        UnloadTexture(armTrack);
+        UnloadTexture(recTrack);
+        CloseWindow();
         return 0;
 }
