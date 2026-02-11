@@ -44,6 +44,15 @@ typedef struct pipeData {
         int argc;
 } pipeData;
 
+typedef struct TextureButton {
+        Rectangle bounds;
+        Texture2D texture;
+        Texture2D pressedTexture;
+        Color tint;
+        bool isPressed;
+        bool isHovered;
+} TextureButton;
+
 float SAMPLE_LEFT;
 float SAMPLE_RIGHT;
 pthread_t guiThread;
@@ -73,7 +82,7 @@ static void on_process(void *userdata)
         if (data->move)
                 fprintf(stdout, "%c[%dA", 0x1b, n_channels + 1);
 
-        fprintf(stdout, "\n");
+        //fprintf(stdout, "\n");
         for (c = 0; c < data->format.info.raw.channels; c++) {
                 max = 0.0f;
                 for (n = c; n < n_samples; n += n_channels) {
@@ -103,7 +112,7 @@ static void on_process(void *userdata)
         //fprintf(stdout, "File: %s | %ld bytes", data->sfName, fsize);
 
         data->move = true;
-        fflush(stdout);
+        //fflush(stdout);
         pw_stream_queue_buffer(data->stream, b);
 }
 
@@ -233,8 +242,6 @@ void drawControls(Texture2D stopTrack, Texture2D armTrack, Texture2D recTrack)
 void* piper(void* arg)
 {
         pipeData *pdPtr = (pipeData*)arg;
-        // Use a pointer to the shared pipeData so the thread owns its lifetime
-        // and we can clean it up when done.
         data data = pdPtr->dat;
         char* streamTarget = pdPtr->target;
         int argc = pdPtr->argc;
@@ -309,9 +316,7 @@ void* piper(void* arg)
         }
         /* Note: sf handle closing is managed by the thread if used. */
 
-        /* Free the thread-allocated pipeData struct. */
         free(pdPtr);
-
         return NULL;
 }
 
@@ -353,7 +358,7 @@ int main(int argc, char *argv[])
                 }
         }*/
 
-        struct data data = { 0, };
+        data data = { 0, };
 
         data.sfName = path != NULL ? path : "out-recording.wav";
         const int channels = 2;
@@ -374,8 +379,19 @@ int main(int argc, char *argv[])
         SetTargetFPS(60);
 
         Texture2D armTrack = LoadTexture("./assets/arm-track.png");
+        Texture2D armTrackPressed = LoadTexture("./assets/arm-track-pressed.png");
         Texture2D recTrack = LoadTexture("./assets/play.png");
+        Texture2D recTrackPressed = LoadTexture("./assets/play-pressed.png");
         Texture2D stopTrack = LoadTexture("./assets/stop-track.png");
+
+        TextureButton armTrackBtn = {
+                .bounds = { 25, HEIGHT-60, 60, 60 },  // x, y, width, height
+                .texture = armTrack,
+                .pressedTexture = armTrackPressed,
+                .tint = WHITE,
+                .isHovered = false,
+                .isPressed = false
+        };
 
         pw_init(&argc, &argv);
         pipeData *pd = malloc(sizeof(pipeData));
@@ -389,7 +405,21 @@ int main(int argc, char *argv[])
                 return 1;
         }
 
+        bool clicked = false;
         while (!WindowShouldClose()) {
+                Vector2 mousePos = GetMousePosition();
+
+                armTrackBtn.isHovered = CheckCollisionPointRec(mousePos, armTrackBtn.bounds);
+                armTrackBtn.isPressed = false;
+
+                if (armTrackBtn.isHovered && IsMouseButtonDown(MOUSE_LEFT_BUTTON))
+                        armTrackBtn.isPressed = true;
+
+                if (armTrackBtn.isHovered && IsMouseButtonReleased(MOUSE_LEFT_BUTTON))
+                        clicked = true;
+                else
+                        clicked = false;
+
                 BeginDrawing();
                 ClearBackground(BLACK);
                 DrawRectangle(20, 20, 425, 150, ORANGE);
