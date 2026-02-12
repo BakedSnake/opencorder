@@ -48,10 +48,15 @@ typedef struct TextureButton {
         Rectangle bounds;
         Texture2D texture;
         Texture2D pressedTexture;
+        Texture2D hoverTexture;
         Color tint;
         bool isPressed;
         bool isHovered;
 } TextureButton;
+
+TextureButton stopTrackBtn;
+TextureButton armTrackBtn;
+TextureButton recTrackBtn;
 
 float SAMPLE_LEFT;
 float SAMPLE_RIGHT;
@@ -82,34 +87,39 @@ static void on_process(void *userdata)
         if (data->move)
                 fprintf(stdout, "%c[%dA", 0x1b, n_channels + 1);
 
-        //fprintf(stdout, "\n");
-        for (c = 0; c < data->format.info.raw.channels; c++) {
-                max = 0.0f;
-                for (n = c; n < n_samples; n += n_channels) {
-                        max = fmaxf(max, fabsf(samples[n]));
+        if (armTrackBtn.isPressed) {
+                //fprintf(stdout, "\n");
+                for (c = 0; c < data->format.info.raw.channels; c++) {
+                        max = 0.0f;
+                        for (n = c; n < n_samples; n += n_channels) {
+                                max = fmaxf(max, fabsf(samples[n]));
+                        }
+
+                        SAMPLE_LEFT = c == 0 ? samples[0] : SAMPLE_LEFT;
+                        SAMPLE_RIGHT = c == 1 ? samples[1] : SAMPLE_RIGHT;
+
+                        //peak = (uint32_t)SPA_CLAMPF(max * 30, 0.f, 39.f);
+
+                        /*fprintf(stdout, "channel %d: |%*s%*s| peak:%f\n",
+                                        c, peak+1, "*", 40 - peak, "", max);*/
                 }
-
-                SAMPLE_LEFT = c == 0 ? samples[0] : SAMPLE_LEFT;
-                SAMPLE_RIGHT = c == 1 ? samples[1] : SAMPLE_RIGHT;
-
-                //peak = (uint32_t)SPA_CLAMPF(max * 30, 0.f, 39.f);
-
-                /*fprintf(stdout, "channel %d: |%*s%*s| peak:%f\n",
-                                c, peak+1, "*", 40 - peak, "", max);*/
         }
 
         // Write sample data (total nr samples) to file.
-        sf_write_float(data->sf, samples, n_samples);
+        if (armTrackBtn.isPressed && recTrackBtn.isPressed) {
+                sf_write_float(data->sf, samples, n_samples);
 
-        // Keep track of file size.
-        long fsize = 0;
-        FILE *file = fopen(data->sfName, "r");
-        if (file != NULL) {
-                fseek(file, 0, SEEK_END);
-                fsize = ftell(file);
-                fclose(file);
+                // Keep track of file size.
+                long fsize = 0;
+                FILE *file = fopen(data->sfName, "r");
+                if (file != NULL) {
+                        fseek(file, 0, SEEK_END);
+                        fsize = ftell(file);
+                        fclose(file);
+                }
+                //fprintf(stdout, "File: %s | %ld bytes", data->sfName, fsize);
         }
-        //fprintf(stdout, "File: %s | %ld bytes", data->sfName, fsize);
+
 
         data->move = true;
         //fflush(stdout);
@@ -232,11 +242,29 @@ void drawVolumeValues()
         free(right);
 }
 
-void drawControls(Texture2D stopTrack, Texture2D armTrack, Texture2D recTrack)
+void drawControls()
 {
-        DrawTextureEx(stopTrack, (Vector2){25, HEIGHT - 60}, .0f, .75f, WHITE);
-        DrawTextureEx(armTrack, (Vector2){72, HEIGHT - 60}, .0f, .75f, WHITE);
-        DrawTextureEx(recTrack, (Vector2){119, HEIGHT - 60}, .0f, .75f, WHITE);
+        Texture2D currArmTrackTexture = armTrackBtn.texture;
+        if (armTrackBtn.isPressed)
+                currArmTrackTexture = armTrackBtn.pressedTexture;
+        else if (armTrackBtn.isHovered)
+                currArmTrackTexture = armTrackBtn.hoverTexture;
+
+        Texture2D currRecTrackTexture = recTrackBtn.texture;
+        if (recTrackBtn.isPressed)
+                currRecTrackTexture = recTrackBtn.pressedTexture;
+        else if (recTrackBtn.isHovered)
+                currRecTrackTexture = recTrackBtn.hoverTexture;
+
+        Texture2D currStopTrackTexture = stopTrackBtn.texture;
+        if (stopTrackBtn.isPressed)
+                currStopTrackTexture = stopTrackBtn.pressedTexture;
+        else if (stopTrackBtn.isHovered)
+                currStopTrackTexture = stopTrackBtn.hoverTexture;
+
+        DrawTextureEx(currStopTrackTexture, (Vector2){25, HEIGHT - 60}, .0f, .75f, WHITE);
+        DrawTextureEx(currArmTrackTexture, (Vector2){72, HEIGHT - 60}, .0f, .75f, WHITE);
+        DrawTextureEx(currRecTrackTexture, (Vector2){119, HEIGHT - 60}, .0f, .75f, WHITE);
 }
 
 void* piper(void* arg)
@@ -383,15 +411,39 @@ int main(int argc, char *argv[])
         Texture2D recTrack = LoadTexture("./assets/play.png");
         Texture2D recTrackPressed = LoadTexture("./assets/play-pressed.png");
         Texture2D stopTrack = LoadTexture("./assets/stop-track.png");
+        Texture2D stopTrackPressed = LoadTexture("./assets/stop-track-pressed.png");
 
-        TextureButton armTrackBtn = {
+        TextureButton stopBtn = {
                 .bounds = { 25, HEIGHT-60, 60, 60 },  // x, y, width, height
-                .texture = armTrack,
-                .pressedTexture = armTrackPressed,
+                .texture = stopTrack,
+                .pressedTexture = stopTrackPressed,
+                .hoverTexture = stopTrack,
                 .tint = WHITE,
                 .isHovered = false,
                 .isPressed = false
         };
+        TextureButton armBtn = {
+                .bounds = { 72, HEIGHT-60, 60, 60 },  // x, y, width, height
+                .texture = armTrack,
+                .pressedTexture = armTrackPressed,
+                .hoverTexture = armTrack,
+                .tint = WHITE,
+                .isHovered = false,
+                .isPressed = false
+        };
+        TextureButton recBtn = {
+                .bounds = { 119, HEIGHT-60, 60, 60 },  // x, y, width, height
+                .texture = recTrack,
+                .pressedTexture = recTrackPressed,
+                .hoverTexture = recTrack,
+                .tint = WHITE,
+                .isHovered = false,
+                .isPressed = false
+        };
+
+        stopTrackBtn = stopBtn;
+        armTrackBtn = armBtn;
+        recTrackBtn = recBtn;
 
         pw_init(&argc, &argv);
         pipeData *pd = malloc(sizeof(pipeData));
@@ -410,15 +462,39 @@ int main(int argc, char *argv[])
                 Vector2 mousePos = GetMousePosition();
 
                 armTrackBtn.isHovered = CheckCollisionPointRec(mousePos, armTrackBtn.bounds);
-                armTrackBtn.isPressed = false;
+                recTrackBtn.isHovered = CheckCollisionPointRec(mousePos, recTrackBtn.bounds);
+                stopTrackBtn.isHovered = CheckCollisionPointRec(mousePos, stopTrackBtn.bounds);
+                stopTrackBtn.isPressed = false;
 
-                if (armTrackBtn.isHovered && IsMouseButtonDown(MOUSE_LEFT_BUTTON))
-                        armTrackBtn.isPressed = true;
+                if (armTrackBtn.isHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                        if (armTrackBtn.isPressed) {
+                                armTrackBtn.isPressed = false; clicked = true;
+                        } else {
+                                armTrackBtn.isPressed = true; clicked = true;
+                        }
+                }
 
-                if (armTrackBtn.isHovered && IsMouseButtonReleased(MOUSE_LEFT_BUTTON))
+                if (recTrackBtn.isHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                        if (recTrackBtn.isPressed) {
+                                recTrackBtn.isPressed = false; clicked = true;
+                        } else {
+                                recTrackBtn.isPressed = true; clicked = true;
+                        }
+                }
+
+                if (stopTrackBtn.isHovered && IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
+                        stopTrackBtn.isPressed = true;
+                }
+
+                if (stopTrackBtn.isPressed) {
+                        armTrackBtn.isPressed = false;
+                        recTrackBtn.isPressed = false;
+                }
+
+                /* if (pauseTrackBtn.isHovered && IsMouseButtonReleased(MOUSE_LEFT_BUTTON))
                         clicked = true;
                 else
-                        clicked = false;
+                        clicked = false; */
 
                 BeginDrawing();
                 ClearBackground(BLACK);
@@ -427,7 +503,7 @@ int main(int argc, char *argv[])
                 drawInfo(data, sfinfo);
                 drawVolumeMeters();
                 drawVolumeValues();
-                drawControls(stopTrack, armTrack, recTrack);
+                drawControls();
                 EndDrawing();
         }
 
