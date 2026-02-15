@@ -441,7 +441,7 @@ int main(int argc, char *argv[])
         Texture2D saveFilePressed = LoadTexture("./assets/save-pressed.png");
 
         TextureButton stopBtn = {
-                .bounds = { 25, HEIGHT-60, 60, 60 },  // x, y, width, height
+                .bounds = { 25, HEIGHT-60, 60, 60 },
                 .texture = stopTrack,
                 .pressedTexture = stopTrackPressed,
                 .hoverTexture = stopTrack,
@@ -450,7 +450,7 @@ int main(int argc, char *argv[])
                 .isPressed = false
         };
         TextureButton armBtn = {
-                .bounds = { 72, HEIGHT-60, 60, 60 },  // x, y, width, height
+                .bounds = { 72, HEIGHT-60, 60, 60 },
                 .texture = armTrack,
                 .pressedTexture = armTrackPressed,
                 .hoverTexture = armTrack,
@@ -459,7 +459,7 @@ int main(int argc, char *argv[])
                 .isPressed = false
         };
         TextureButton recBtn = {
-                .bounds = { 119, HEIGHT-60, 60, 60 },  // x, y, width, height
+                .bounds = { 119, HEIGHT-60, 60, 60 },
                 .texture = recTrack,
                 .pressedTexture = recTrackPressed,
                 .hoverTexture = recTrack,
@@ -468,7 +468,7 @@ int main(int argc, char *argv[])
                 .isPressed = false
         };
         TextureButton pauseBtn = {
-                .bounds = { 166, HEIGHT-60, 60, 60 },  // x, y, width, height
+                .bounds = { 166, HEIGHT-60, 60, 60 },
                 .texture = pauseTrack,
                 .pressedTexture = pauseTrackPressed,
                 .hoverTexture = pauseTrack,
@@ -478,7 +478,7 @@ int main(int argc, char *argv[])
         };
 
         TextureButton saveBtn = {
-                .bounds = { 300, HEIGHT-60, 60, 30 },  // x, y, width, height
+                .bounds = { 300, HEIGHT-60, 60, 30 },
                 .texture = saveFile,
                 .pressedTexture = saveFilePressed,
                 .hoverTexture = saveFile,
