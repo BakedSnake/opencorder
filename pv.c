@@ -218,8 +218,8 @@ void drawInfo(data data, SF_INFO sfinfo)
 
 void drawVolumeMeters()
 {
-        DrawRectangle(550, 20, 30, 305, RED);
-        DrawRectangle(500, 20, 30, 305, RED);
+        DrawRectangle(550, 20, 30, 305, BLACK);
+        DrawRectangle(500, 20, 30, 305, BLACK);
 
         float leftFull = SAMPLE_LEFT * 305;
         float rightFull = SAMPLE_RIGHT * 305;
@@ -232,8 +232,8 @@ void drawVolumeMeters()
                         DrawRectangle(WIDTH-50, 325-j, 30, 1, GREEN);
         }
 
-        DrawRectangleLines(550, 20, 30, 305, WHITE);
-        DrawRectangleLines(500, 20, 30, 305, WHITE);
+        DrawRectangleLines(550, 20, 30, 305, BLACK);
+        DrawRectangleLines(500, 20, 30, 305, BLACK);
 }
 
 void drawVolumeValues()
