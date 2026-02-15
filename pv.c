@@ -57,6 +57,7 @@ typedef struct TextureButton {
 TextureButton stopTrackBtn;
 TextureButton armTrackBtn;
 TextureButton recTrackBtn;
+TextureButton pauseTrackBtn;
 
 float SAMPLE_LEFT;
 float SAMPLE_RIGHT;
@@ -262,9 +263,16 @@ void drawControls()
         else if (stopTrackBtn.isHovered)
                 currStopTrackTexture = stopTrackBtn.hoverTexture;
 
+        Texture2D currPauseTrackTexture = pauseTrackBtn.texture;
+        if (pauseTrackBtn.isPressed)
+                currPauseTrackTexture = pauseTrackBtn.pressedTexture;
+        else if (pauseTrackBtn.isHovered)
+                currPauseTrackTexture = pauseTrackBtn.hoverTexture;
+
         DrawTextureEx(currStopTrackTexture, (Vector2){25, HEIGHT - 60}, .0f, .75f, WHITE);
         DrawTextureEx(currArmTrackTexture, (Vector2){72, HEIGHT - 60}, .0f, .75f, WHITE);
         DrawTextureEx(currRecTrackTexture, (Vector2){119, HEIGHT - 60}, .0f, .75f, WHITE);
+        DrawTextureEx(currPauseTrackTexture, (Vector2){166, HEIGHT - 60}, .0f, .75f, WHITE);
 }
 
 void* piper(void* arg)
@@ -412,6 +420,8 @@ int main(int argc, char *argv[])
         Texture2D recTrackPressed = LoadTexture("./assets/play-pressed.png");
         Texture2D stopTrack = LoadTexture("./assets/stop-track.png");
         Texture2D stopTrackPressed = LoadTexture("./assets/stop-track-pressed.png");
+        Texture2D pauseTrack = LoadTexture("./assets/pause-track.png");
+        Texture2D pauseTrackPressed = LoadTexture("./assets/pause-track-pressed.png");
 
         TextureButton stopBtn = {
                 .bounds = { 25, HEIGHT-60, 60, 60 },  // x, y, width, height
@@ -440,10 +450,20 @@ int main(int argc, char *argv[])
                 .isHovered = false,
                 .isPressed = false
         };
+        TextureButton pauseBtn = {
+                .bounds = { 166, HEIGHT-60, 60, 60 },  // x, y, width, height
+                .texture = pauseTrack,
+                .pressedTexture = pauseTrackPressed,
+                .hoverTexture = pauseTrack,
+                .tint = WHITE,
+                .isHovered = false,
+                .isPressed = false
+        };
 
         stopTrackBtn = stopBtn;
         armTrackBtn = armBtn;
         recTrackBtn = recBtn;
+        pauseTrackBtn = pauseBtn;
 
         pw_init(&argc, &argv);
         pipeData *pd = malloc(sizeof(pipeData));
@@ -457,10 +477,10 @@ int main(int argc, char *argv[])
                 return 1;
         }
 
-        bool clicked = false;
         while (!WindowShouldClose()) {
                 Vector2 mousePos = GetMousePosition();
 
+                pauseTrackBtn.isHovered = CheckCollisionPointRec(mousePos, pauseTrackBtn.bounds);
                 armTrackBtn.isHovered = CheckCollisionPointRec(mousePos, armTrackBtn.bounds);
                 recTrackBtn.isHovered = CheckCollisionPointRec(mousePos, recTrackBtn.bounds);
                 stopTrackBtn.isHovered = CheckCollisionPointRec(mousePos, stopTrackBtn.bounds);
@@ -468,17 +488,37 @@ int main(int argc, char *argv[])
 
                 if (armTrackBtn.isHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                         if (armTrackBtn.isPressed) {
-                                armTrackBtn.isPressed = false; clicked = true;
+                                armTrackBtn.isPressed = false;
                         } else {
-                                armTrackBtn.isPressed = true; clicked = true;
+                                armTrackBtn.isPressed = true;
                         }
                 }
 
                 if (recTrackBtn.isHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                         if (recTrackBtn.isPressed) {
-                                recTrackBtn.isPressed = false; clicked = true;
+                                recTrackBtn.isPressed = false;
                         } else {
-                                recTrackBtn.isPressed = true; clicked = true;
+                                recTrackBtn.isPressed = true;
+                        }
+                }
+
+                if (pauseTrackBtn.isHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                        if (!pauseTrackBtn.isPressed) {
+                                if (armTrackBtn.isPressed)
+                                        armTrackBtn.isPressed = false;
+
+                                if (recTrackBtn.isPressed)
+                                        recTrackBtn.isPressed = false;
+
+                                pauseTrackBtn.isPressed = true;
+                        } else {
+                                if (armTrackBtn.isPressed)
+                                        armTrackBtn.isPressed = true;
+
+                                if (recTrackBtn.isPressed)
+                                        recTrackBtn.isPressed = true;
+
+                                pauseTrackBtn.isPressed = false;
                         }
                 }
 
@@ -489,12 +529,8 @@ int main(int argc, char *argv[])
                 if (stopTrackBtn.isPressed) {
                         armTrackBtn.isPressed = false;
                         recTrackBtn.isPressed = false;
+                        pauseTrackBtn.isPressed = false;
                 }
-
-                /* if (pauseTrackBtn.isHovered && IsMouseButtonReleased(MOUSE_LEFT_BUTTON))
-                        clicked = true;
-                else
-                        clicked = false; */
 
                 BeginDrawing();
                 ClearBackground(BLACK);
