@@ -44,6 +44,12 @@ typedef struct pipeData {
         int argc;
 } pipeData;
 
+typedef struct State {
+        bool isRecording;
+        bool isArmed;
+        bool isPaused;
+} State;
+
 typedef struct TextureButton {
         Rectangle bounds;
         Texture2D texture;
@@ -58,6 +64,7 @@ TextureButton stopTrackBtn;
 TextureButton armTrackBtn;
 TextureButton recTrackBtn;
 TextureButton pauseTrackBtn;
+TextureButton saveFileBtn;
 
 float SAMPLE_LEFT;
 float SAMPLE_RIGHT;
@@ -269,6 +276,13 @@ void drawControls()
         else if (pauseTrackBtn.isHovered)
                 currPauseTrackTexture = pauseTrackBtn.hoverTexture;
 
+        Texture2D currSaveFileTexture = saveFileBtn.texture;
+        if (saveFileBtn.isPressed)
+                currSaveFileTexture = saveFileBtn.pressedTexture;
+        else if (saveFileBtn.isHovered)
+                currSaveFileTexture = saveFileBtn.hoverTexture;
+
+        DrawTextureEx(currSaveFileTexture, (Vector2){300, HEIGHT - 60}, .0f, .75f, WHITE);
         DrawTextureEx(currStopTrackTexture, (Vector2){25, HEIGHT - 60}, .0f, .75f, WHITE);
         DrawTextureEx(currArmTrackTexture, (Vector2){72, HEIGHT - 60}, .0f, .75f, WHITE);
         DrawTextureEx(currRecTrackTexture, (Vector2){119, HEIGHT - 60}, .0f, .75f, WHITE);
@@ -423,6 +437,9 @@ int main(int argc, char *argv[])
         Texture2D pauseTrack = LoadTexture("./assets/pause-track.png");
         Texture2D pauseTrackPressed = LoadTexture("./assets/pause-track-pressed.png");
 
+        Texture2D saveFile = LoadTexture("./assets/save.png");
+        Texture2D saveFilePressed = LoadTexture("./assets/save-pressed.png");
+
         TextureButton stopBtn = {
                 .bounds = { 25, HEIGHT-60, 60, 60 },  // x, y, width, height
                 .texture = stopTrack,
@@ -460,10 +477,21 @@ int main(int argc, char *argv[])
                 .isPressed = false
         };
 
+        TextureButton saveBtn = {
+                .bounds = { 300, HEIGHT-60, 60, 30 },  // x, y, width, height
+                .texture = saveFile,
+                .pressedTexture = saveFilePressed,
+                .hoverTexture = saveFile,
+                .tint = WHITE,
+                .isHovered = false,
+                .isPressed = false
+        };
+
         stopTrackBtn = stopBtn;
         armTrackBtn = armBtn;
         recTrackBtn = recBtn;
         pauseTrackBtn = pauseBtn;
+        saveFileBtn = saveBtn;
 
         pw_init(&argc, &argv);
         pipeData *pd = malloc(sizeof(pipeData));
@@ -480,11 +508,13 @@ int main(int argc, char *argv[])
         while (!WindowShouldClose()) {
                 Vector2 mousePos = GetMousePosition();
 
+                saveFileBtn.isHovered = CheckCollisionPointRec(mousePos, saveFileBtn.bounds);
                 pauseTrackBtn.isHovered = CheckCollisionPointRec(mousePos, pauseTrackBtn.bounds);
                 armTrackBtn.isHovered = CheckCollisionPointRec(mousePos, armTrackBtn.bounds);
                 recTrackBtn.isHovered = CheckCollisionPointRec(mousePos, recTrackBtn.bounds);
                 stopTrackBtn.isHovered = CheckCollisionPointRec(mousePos, stopTrackBtn.bounds);
                 stopTrackBtn.isPressed = false;
+                saveFileBtn.isPressed = false;
 
                 if (armTrackBtn.isHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                         if (armTrackBtn.isPressed) {
@@ -531,6 +561,11 @@ int main(int argc, char *argv[])
                         recTrackBtn.isPressed = false;
                         pauseTrackBtn.isPressed = false;
                 }
+
+                if (saveFileBtn.isHovered && IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
+                        saveFileBtn.isPressed = true;
+                }
+
 
                 BeginDrawing();
                 ClearBackground(BLACK);
