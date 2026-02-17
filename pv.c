@@ -60,12 +60,16 @@ typedef struct TextureButton {
         bool isHovered;
 } TextureButton;
 
-TextureButton stopTrackBtn;
-TextureButton armTrackBtn;
-TextureButton recTrackBtn;
-TextureButton pauseTrackBtn;
-TextureButton saveFileBtn;
-TextureButton newFileBtn;
+typedef struct Transport {
+        TextureButton stopTrackBtn;
+        TextureButton armTrackBtn;
+        TextureButton recTrackBtn;
+        TextureButton pauseTrackBtn;
+        TextureButton saveFileBtn;
+        TextureButton newFileBtn;
+} Transport;
+
+Transport transport;
 
 float SAMPLE_LEFT;
 float SAMPLE_RIGHT;
@@ -96,7 +100,7 @@ static void on_process(void *userdata)
         if (data->move)
                 fprintf(stdout, "%c[%dA", 0x1b, n_channels + 1);
 
-        if (armTrackBtn.isPressed) {
+        if (transport.armTrackBtn.isPressed) {
                 //fprintf(stdout, "\n");
                 for (c = 0; c < data->format.info.raw.channels; c++) {
                         max = 0.0f;
@@ -115,7 +119,7 @@ static void on_process(void *userdata)
         }
 
         // Write sample data (total nr samples) to file.
-        if (armTrackBtn.isPressed && recTrackBtn.isPressed) {
+        if (transport.armTrackBtn.isPressed && transport.recTrackBtn.isPressed) {
                 sf_write_float(data->sf, samples, n_samples);
 
                 // Keep track of file size.
@@ -216,24 +220,24 @@ void drawInfo(data data, SF_INFO sfinfo)
         DrawText(master, 115, 62, 14, BEIGE);
 }
 
-void drawVolumeMeters()
+void drawVolumeMeters(Texture2D faderTex)
 {
-        DrawRectangle(550, 20, 30, 305, BLACK);
-        DrawRectangle(500, 20, 30, 305, BLACK);
+        DrawTexture(faderTex, 500, 20, WHITE);
+        DrawTexture(faderTex, 550, 20, WHITE);
 
-        float leftFull = SAMPLE_LEFT * 305;
-        float rightFull = SAMPLE_RIGHT * 305;
+        float leftFull = SAMPLE_LEFT * 280;
+        float rightFull = SAMPLE_RIGHT * 280;
 
-        for (size_t j = 0; j < (305); ++j) {
+        for (size_t j = 0; j < (280); ++j) {
                 if (j < leftFull)
-                        DrawRectangle(WIDTH-100, 325-j, 30, 1, GREEN);
+                        DrawRectangle(WIDTH-100, 299-j, 30, 1, GREEN);
 
                 if (j < rightFull)
-                        DrawRectangle(WIDTH-50, 325-j, 30, 1, GREEN);
+                        DrawRectangle(WIDTH-50, 299-j, 30, 1, GREEN);
         }
 
-        DrawRectangleLines(550, 20, 30, 305, BLACK);
-        DrawRectangleLines(500, 20, 30, 305, BLACK);
+        DrawRectangleLines(550, 20, 30, 280, BLACK);
+        DrawRectangleLines(500, 20, 30, 280, BLACK);
 }
 
 void drawVolumeValues()
@@ -244,8 +248,8 @@ void drawVolumeValues()
         snprintf(left, sizeof(SAMPLE_LEFT)+1, "%.2f", SAMPLE_LEFT);
         snprintf(right, sizeof(SAMPLE_RIGHT)+1, "%.2f", SAMPLE_RIGHT);
 
-        DrawText(left, 505, 330, 14, RED);
-        DrawText(right, 555, 330, 14, RED);
+        DrawText(left, 505, 305, 14, RED);
+        DrawText(right, 555, 305, 14, RED);
 
         free(left);
         free(right);
@@ -253,48 +257,48 @@ void drawVolumeValues()
 
 void drawControls()
 {
-        Texture2D currArmTrackTexture = armTrackBtn.texture;
-        if (armTrackBtn.isPressed)
-                currArmTrackTexture = armTrackBtn.pressedTexture;
-        else if (armTrackBtn.isHovered)
-                currArmTrackTexture = armTrackBtn.hoverTexture;
+        Texture2D currArmTrackTexture = transport.armTrackBtn.texture;
+        if (transport.armTrackBtn.isPressed)
+                currArmTrackTexture = transport.armTrackBtn.pressedTexture;
+        else if (transport.armTrackBtn.isHovered)
+                currArmTrackTexture = transport.armTrackBtn.hoverTexture;
 
-        Texture2D currRecTrackTexture = recTrackBtn.texture;
-        if (recTrackBtn.isPressed)
-                currRecTrackTexture = recTrackBtn.pressedTexture;
-        else if (recTrackBtn.isHovered)
-                currRecTrackTexture = recTrackBtn.hoverTexture;
+        Texture2D currRecTrackTexture = transport.recTrackBtn.texture;
+        if (transport.recTrackBtn.isPressed)
+                currRecTrackTexture = transport.recTrackBtn.pressedTexture;
+        else if (transport.recTrackBtn.isHovered)
+                currRecTrackTexture = transport.recTrackBtn.hoverTexture;
 
-        Texture2D currStopTrackTexture = stopTrackBtn.texture;
-        if (stopTrackBtn.isPressed)
-                currStopTrackTexture = stopTrackBtn.pressedTexture;
-        else if (stopTrackBtn.isHovered)
-                currStopTrackTexture = stopTrackBtn.hoverTexture;
+        Texture2D currStopTrackTexture = transport.stopTrackBtn.texture;
+        if (transport.stopTrackBtn.isPressed)
+                currStopTrackTexture = transport.stopTrackBtn.pressedTexture;
+        else if (transport.stopTrackBtn.isHovered)
+                currStopTrackTexture = transport.stopTrackBtn.hoverTexture;
 
-        Texture2D currPauseTrackTexture = pauseTrackBtn.texture;
-        if (pauseTrackBtn.isPressed)
-                currPauseTrackTexture = pauseTrackBtn.pressedTexture;
-        else if (pauseTrackBtn.isHovered)
-                currPauseTrackTexture = pauseTrackBtn.hoverTexture;
+        Texture2D currPauseTrackTexture = transport.pauseTrackBtn.texture;
+        if (transport.pauseTrackBtn.isPressed)
+                currPauseTrackTexture = transport.pauseTrackBtn.pressedTexture;
+        else if (transport.pauseTrackBtn.isHovered)
+                currPauseTrackTexture = transport.pauseTrackBtn.hoverTexture;
 
-        Texture2D currNewFileTexture = newFileBtn.texture;
-        if (newFileBtn.isPressed)
-                currNewFileTexture = newFileBtn.pressedTexture;
-        else if (newFileBtn.isHovered)
-                currNewFileTexture = newFileBtn.hoverTexture;
+        Texture2D currNewFileTexture = transport.newFileBtn.texture;
+        if (transport.newFileBtn.isPressed)
+                currNewFileTexture = transport.newFileBtn.pressedTexture;
+        else if (transport.newFileBtn.isHovered)
+                currNewFileTexture = transport.newFileBtn.hoverTexture;
 
-        Texture2D currSaveFileTexture = saveFileBtn.texture;
-        if (saveFileBtn.isPressed)
-                currSaveFileTexture = saveFileBtn.pressedTexture;
-        else if (saveFileBtn.isHovered)
-                currSaveFileTexture = saveFileBtn.hoverTexture;
+        Texture2D currSaveFileTexture = transport.saveFileBtn.texture;
+        if (transport.saveFileBtn.isPressed)
+                currSaveFileTexture = transport.saveFileBtn.pressedTexture;
+        else if (transport.saveFileBtn.isHovered)
+                currSaveFileTexture = transport.saveFileBtn.hoverTexture;
 
-        DrawTextureEx(currNewFileTexture, (Vector2){300, HEIGHT - 75}, .0f, .75f, WHITE);
-        DrawTextureEx(currSaveFileTexture, (Vector2){300, HEIGHT - 51}, .0f, .75f, WHITE);
-        DrawTextureEx(currStopTrackTexture, (Vector2){25, HEIGHT - 75}, .0f, .75f, WHITE);
-        DrawTextureEx(currArmTrackTexture, (Vector2){72, HEIGHT - 75}, .0f, .75f, WHITE);
-        DrawTextureEx(currRecTrackTexture, (Vector2){119, HEIGHT - 75}, .0f, .75f, WHITE);
-        DrawTextureEx(currPauseTrackTexture, (Vector2){166, HEIGHT - 75}, .0f, .75f, WHITE);
+        DrawTextureEx(currNewFileTexture,       (Vector2){310, 235}, .0f, .75f, WHITE);
+        DrawTextureEx(currSaveFileTexture,      (Vector2){310, 260}, .0f, .75f, WHITE);
+        DrawTextureEx(currStopTrackTexture,     (Vector2){35 , 235}, .0f, .75f, WHITE);
+        DrawTextureEx(currArmTrackTexture,      (Vector2){82 , 235}, .0f, .75f, WHITE);
+        DrawTextureEx(currRecTrackTexture,      (Vector2){129, 235}, .0f, .75f, WHITE);
+        DrawTextureEx(currPauseTrackTexture,    (Vector2){176, 235}, .0f, .75f, WHITE);
 }
 
 void* piper(void* arg)
@@ -438,6 +442,7 @@ int main(int argc, char *argv[])
         Texture2D backgroundTexture = LoadTexture("./assets/Background.png");
         Texture2D screenTexture = LoadTexture("./assets/Screen.png");
         Texture2D transportTexture = LoadTexture("./assets/Transport.png");
+        Texture2D faderTexture = LoadTexture("./assets/Fader.png");
 
         Texture2D armTrack = LoadTexture("./assets/arm-track.png");
         Texture2D armTrackPressed = LoadTexture("./assets/arm-track-pressed.png");
@@ -454,7 +459,7 @@ int main(int argc, char *argv[])
         Texture2D saveFilePressed = LoadTexture("./assets/save-pressed.png");
 
         TextureButton stopBtn = {
-                .bounds = { 25, HEIGHT-75, 60, 60 },
+                .bounds = { 35, 235, 60, 60 },
                 .texture = stopTrack,
                 .pressedTexture = stopTrackPressed,
                 .hoverTexture = stopTrack,
@@ -463,7 +468,7 @@ int main(int argc, char *argv[])
                 .isPressed = false
         };
         TextureButton armBtn = {
-                .bounds = { 72, HEIGHT-75, 60, 60 },
+                .bounds = { 82, 235, 60, 60 },
                 .texture = armTrack,
                 .pressedTexture = armTrackPressed,
                 .hoverTexture = armTrack,
@@ -472,7 +477,7 @@ int main(int argc, char *argv[])
                 .isPressed = false
         };
         TextureButton recBtn = {
-                .bounds = { 119, HEIGHT-75, 60, 60 },
+                .bounds = { 129, 235, 60, 60 },
                 .texture = recTrack,
                 .pressedTexture = recTrackPressed,
                 .hoverTexture = recTrack,
@@ -481,7 +486,7 @@ int main(int argc, char *argv[])
                 .isPressed = false
         };
         TextureButton pauseBtn = {
-                .bounds = { 166, HEIGHT-75, 60, 60 },
+                .bounds = { 176, 235, 60, 60 },
                 .texture = pauseTrack,
                 .pressedTexture = pauseTrackPressed,
                 .hoverTexture = pauseTrack,
@@ -491,7 +496,7 @@ int main(int argc, char *argv[])
         };
 
         TextureButton newBtn = {
-                .bounds = { 300, HEIGHT-75, 60, 30 },
+                .bounds = { 310, 235, 60, 30 },
                 .texture = newFile,
                 .pressedTexture = newFilePressed,
                 .hoverTexture = newFile,
@@ -500,7 +505,7 @@ int main(int argc, char *argv[])
                 .isPressed = false
         };
         TextureButton saveBtn = {
-                .bounds = { 300, HEIGHT-51, 60, 30 },
+                .bounds = { 310, 260, 60, 30 },
                 .texture = saveFile,
                 .pressedTexture = saveFilePressed,
                 .hoverTexture = saveFile,
@@ -509,12 +514,12 @@ int main(int argc, char *argv[])
                 .isPressed = false
         };
 
-        stopTrackBtn = stopBtn;
-        armTrackBtn = armBtn;
-        recTrackBtn = recBtn;
-        pauseTrackBtn = pauseBtn;
-        saveFileBtn = saveBtn;
-        newFileBtn = newBtn;
+        transport.stopTrackBtn = stopBtn;
+        transport.armTrackBtn = armBtn;
+        transport.recTrackBtn = recBtn;
+        transport.pauseTrackBtn = pauseBtn;
+        transport.saveFileBtn = saveBtn;
+        transport.newFileBtn = newBtn;
 
         pw_init(&argc, &argv);
         pipeData *pd = malloc(sizeof(pipeData));
@@ -531,67 +536,67 @@ int main(int argc, char *argv[])
         while (!WindowShouldClose()) {
                 Vector2 mousePos = GetMousePosition();
 
-                newFileBtn.isHovered = CheckCollisionPointRec(mousePos, newFileBtn.bounds);
-                saveFileBtn.isHovered = CheckCollisionPointRec(mousePos, saveFileBtn.bounds);
-                pauseTrackBtn.isHovered = CheckCollisionPointRec(mousePos, pauseTrackBtn.bounds);
-                armTrackBtn.isHovered = CheckCollisionPointRec(mousePos, armTrackBtn.bounds);
-                recTrackBtn.isHovered = CheckCollisionPointRec(mousePos, recTrackBtn.bounds);
-                stopTrackBtn.isHovered = CheckCollisionPointRec(mousePos, stopTrackBtn.bounds);
-                stopTrackBtn.isPressed = false;
-                saveFileBtn.isPressed = false;
-                newFileBtn.isPressed = false;
+                transport.newFileBtn.isHovered = CheckCollisionPointRec(mousePos, transport.newFileBtn.bounds);
+                transport.saveFileBtn.isHovered = CheckCollisionPointRec(mousePos, transport.saveFileBtn.bounds);
+                transport.pauseTrackBtn.isHovered = CheckCollisionPointRec(mousePos, transport.pauseTrackBtn.bounds);
+                transport.armTrackBtn.isHovered = CheckCollisionPointRec(mousePos, transport.armTrackBtn.bounds);
+                transport.recTrackBtn.isHovered = CheckCollisionPointRec(mousePos, transport.recTrackBtn.bounds);
+                transport.stopTrackBtn.isHovered = CheckCollisionPointRec(mousePos, transport.stopTrackBtn.bounds);
+                transport.stopTrackBtn.isPressed = false;
+                transport.saveFileBtn.isPressed = false;
+                transport.newFileBtn.isPressed = false;
 
-                if (armTrackBtn.isHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                        if (armTrackBtn.isPressed) {
-                                armTrackBtn.isPressed = false;
+                if (transport.armTrackBtn.isHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                        if (transport.armTrackBtn.isPressed) {
+                                transport.armTrackBtn.isPressed = false;
                         } else {
-                                armTrackBtn.isPressed = true;
+                                transport.armTrackBtn.isPressed = true;
                         }
                 }
 
-                if (recTrackBtn.isHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                        if (recTrackBtn.isPressed) {
-                                recTrackBtn.isPressed = false;
+                if (transport.recTrackBtn.isHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                        if (transport.recTrackBtn.isPressed) {
+                                transport.recTrackBtn.isPressed = false;
                         } else {
-                                recTrackBtn.isPressed = true;
+                                transport.recTrackBtn.isPressed = true;
                         }
                 }
 
-                if (pauseTrackBtn.isHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                        if (!pauseTrackBtn.isPressed) {
-                                if (armTrackBtn.isPressed)
-                                        armTrackBtn.isPressed = false;
+                if (transport.pauseTrackBtn.isHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                        if (!transport.pauseTrackBtn.isPressed) {
+                                if (transport.armTrackBtn.isPressed)
+                                        transport.armTrackBtn.isPressed = false;
 
-                                if (recTrackBtn.isPressed)
-                                        recTrackBtn.isPressed = false;
+                                if (transport.recTrackBtn.isPressed)
+                                        transport.recTrackBtn.isPressed = false;
 
-                                pauseTrackBtn.isPressed = true;
+                                transport.pauseTrackBtn.isPressed = true;
                         } else {
-                                if (armTrackBtn.isPressed)
-                                        armTrackBtn.isPressed = true;
+                                if (transport.armTrackBtn.isPressed)
+                                        transport.armTrackBtn.isPressed = true;
 
-                                if (recTrackBtn.isPressed)
-                                        recTrackBtn.isPressed = true;
+                                if (transport.recTrackBtn.isPressed)
+                                        transport.recTrackBtn.isPressed = true;
 
-                                pauseTrackBtn.isPressed = false;
+                                transport.pauseTrackBtn.isPressed = false;
                         }
                 }
 
-                if (stopTrackBtn.isHovered && IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
-                        stopTrackBtn.isPressed = true;
+                if (transport.stopTrackBtn.isHovered && IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
+                        transport.stopTrackBtn.isPressed = true;
                 }
 
-                if (stopTrackBtn.isPressed) {
-                        armTrackBtn.isPressed = false;
-                        recTrackBtn.isPressed = false;
-                        pauseTrackBtn.isPressed = false;
+                if (transport.stopTrackBtn.isPressed) {
+                        transport.armTrackBtn.isPressed = false;
+                        transport.recTrackBtn.isPressed = false;
+                        transport.pauseTrackBtn.isPressed = false;
                 }
 
-                if (saveFileBtn.isHovered && IsMouseButtonDown(MOUSE_LEFT_BUTTON))
-                        saveFileBtn.isPressed = true;
+                if (transport.saveFileBtn.isHovered && IsMouseButtonDown(MOUSE_LEFT_BUTTON))
+                        transport.saveFileBtn.isPressed = true;
 
-                if (newFileBtn.isHovered && IsMouseButtonDown(MOUSE_LEFT_BUTTON))
-                        newFileBtn.isPressed = true;
+                if (transport.newFileBtn.isHovered && IsMouseButtonDown(MOUSE_LEFT_BUTTON))
+                        transport.newFileBtn.isPressed = true;
 
                 BeginDrawing();
                 ClearBackground(BLACK);
@@ -599,10 +604,10 @@ int main(int argc, char *argv[])
                 DrawTexture(screenTexture, 20, 20, ORANGE);
                 DrawRectangleLines(20, 20, 425, 150, BLACK);
                 drawInfo(data, sfinfo);
-                drawVolumeMeters();
+                drawVolumeMeters(faderTexture);
                 drawVolumeValues();
-                DrawTexture(transportTexture, 20, HEIGHT-90, WHITE);
-                DrawRectangleLines(20, HEIGHT-90, 425, 75, BLACK);
+                DrawTexture(transportTexture, 20, 220, WHITE);
+                DrawRectangleLines(20, 220, 425, 75, BLACK);
                 drawControls();
                 EndDrawing();
         }
