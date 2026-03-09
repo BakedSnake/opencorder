@@ -73,8 +73,13 @@ Transport transport;
 
 float SAMPLE_LEFT;
 float SAMPLE_RIGHT;
+float VOL_RATIO = .1f;
+
+bool FILE_INITD = false;
+
 pthread_t guiThread;
 pthread_t pipeThread;
+SF_INFO sfinfo = {0};
 
 static void on_process(void *userdata)
 {
@@ -108,8 +113,8 @@ static void on_process(void *userdata)
                                 max = fmaxf(max, fabsf(samples[n]));
                         }
 
-                        SAMPLE_LEFT = c == 0 ? samples[0] : SAMPLE_LEFT;
-                        SAMPLE_RIGHT = c == 1 ? samples[1] : SAMPLE_RIGHT;
+                        SAMPLE_LEFT = c == 0 ? samples[0] / VOL_RATIO : SAMPLE_LEFT;
+                        SAMPLE_RIGHT = c == 1 ? samples[1] / VOL_RATIO : SAMPLE_RIGHT;
 
                         //peak = (uint32_t)SPA_CLAMPF(max * 30, 0.f, 39.f);
 
@@ -211,6 +216,27 @@ void drawInfo(data data, SF_INFO sfinfo)
 
         char master[7];
         int chans = sfinfo.channels;
+        if (chans == 2)
+                snprintf(master, 7, "%s", "Stereo");
+
+        if (chans == 1)
+                snprintf(master, 7, "%s", "Mono  ");
+
+        DrawText(master, 115, 62, 14, BEIGE);
+}
+
+void drawInfoDefault(data data)
+{
+        drawheader();
+        char* filename = "out-recording.wav";
+        DrawText(filename, 115, 25, 14, BEIGE);
+
+        char rate[9];
+        snprintf(rate, 9, "%d Hz", 48000);
+        DrawText(rate, 115, 43, 14, BEIGE);
+
+        char master[7];
+        int chans = 2;
         if (chans == 2)
                 snprintf(master, 7, "%s", "Stereo");
 
@@ -322,9 +348,6 @@ void* piper(void* arg)
         /* Create a simple stream, the simple stream manages the core and remote
          * objects for you if you don't need to deal with them.
          *
-         * If you plan to autoconnect your stream, you need to provide at least
-         * media, category and role properties.
-         *
          * Pass your events and a user_data pointer as the last arguments. This
          * will inform you about the stream state. The most important event
          * you need to listen to is the process event where you need to produce
@@ -382,6 +405,25 @@ void* piper(void* arg)
         return NULL;
 }
 
+void sndFileInit(data data, char* path, char* rateStr)
+{
+        data.sfName = path != NULL ? path : "out-recording.wav";
+        const int channels = 2;
+        const int samplerate = rateStr != NULL ? atoi(rateStr) : 48000;
+        const int frames = samplerate;
+
+        sfinfo.samplerate = samplerate;
+        sfinfo.channels = channels;
+        sfinfo.format = SF_FORMAT_WAV | SF_FORMAT_PCM_32;
+        data.sf = sf_open(data.sfName, SFM_WRITE, &sfinfo);
+        if (!data.sf) {
+            fprintf(stderr, "Error opening file: %s\n", sf_strerror(NULL));
+            return;
+        }
+
+        FILE_INITD = true;
+}
+
 int main(int argc, char *argv[])
 {
         int opt;
@@ -421,21 +463,6 @@ int main(int argc, char *argv[])
         }*/
 
         data data = { 0, };
-
-        data.sfName = path != NULL ? path : "out-recording.wav";
-        const int channels = 2;
-        const int samplerate = rateStr != NULL ? atoi(rateStr) : 48000;
-        const int frames = samplerate;
-
-        SF_INFO sfinfo = {0};
-        sfinfo.samplerate = samplerate;
-        sfinfo.channels = channels;
-        sfinfo.format = SF_FORMAT_WAV | SF_FORMAT_PCM_32;
-        data.sf = sf_open(data.sfName, SFM_WRITE, &sfinfo);
-        if (!data.sf) {
-            fprintf(stderr, "Error opening file: %s\n", sf_strerror(NULL));
-            return 1;
-        }
 
         InitWindow(600, 350, "frecorder");
         SetTargetFPS(60);
@@ -547,6 +574,7 @@ int main(int argc, char *argv[])
                 transport.newFileBtn.isPressed = false;
 
                 if (transport.armTrackBtn.isHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                        sndFileInit(data, path, rateStr);
                         if (transport.armTrackBtn.isPressed) {
                                 transport.armTrackBtn.isPressed = false;
                         } else {
@@ -590,6 +618,7 @@ int main(int argc, char *argv[])
                         transport.armTrackBtn.isPressed = false;
                         transport.recTrackBtn.isPressed = false;
                         transport.pauseTrackBtn.isPressed = false;
+                        FILE_INITD = false;
                 }
 
                 if (transport.saveFileBtn.isHovered && IsMouseButtonDown(MOUSE_LEFT_BUTTON))
@@ -603,7 +632,10 @@ int main(int argc, char *argv[])
                 DrawTexture(backgroundTexture, 0, 0, WHITE);
                 DrawTexture(screenTexture, 20, 20, ORANGE);
                 DrawRectangleLines(20, 20, 425, 150, BLACK);
-                drawInfo(data, sfinfo);
+                if (FILE_INITD)
+                  drawInfo(data, sfinfo);
+                else
+                  drawInfoDefault(data);
                 drawVolumeMeters(faderTexture);
                 drawVolumeValues();
                 DrawTexture(transportTexture, 20, 220, WHITE);
