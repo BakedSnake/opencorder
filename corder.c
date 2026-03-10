@@ -18,6 +18,11 @@ size_t charCount = 0;
 pthread_t guiThread;
 pthread_t pipeThread;
 
+Rectangle fileNameInput = (Rectangle){ 107, 23, 135, 18 };
+Rectangle sampleRateInput = (Rectangle){ 107, 41, 135, 18 };
+
+int samplerate = 48000;
+
 void drawheader()
 {
         DrawRectangle(23, 23, 85, 18, LIGHTGRAY);
@@ -30,10 +35,23 @@ void drawheader()
         DrawRectangleLines(23, 59, 85, 18, BLACK);
         DrawText("Master", 25, 62, 14, BLACK);
 
+        // filename
         DrawRectangle(107, 23, 135, 18, BLACK);
-        DrawRectangleLines(107, 23, 135, 18, RED);
+        DrawRectangleLines(
+                        fileNameInput.x,
+                        fileNameInput.y,
+                        fileNameInput.width,
+                        fileNameInput.height,
+                        BEIGE
+        );
+        // sample rate
         DrawRectangle(107, 41, 135, 18, BLACK);
-        DrawRectangleLines(107, 41, 135, 18, BEIGE);
+        DrawRectangleLines(sampleRateInput.x,
+                        sampleRateInput.y,
+                        sampleRateInput.width,
+                        sampleRateInput.height,
+                        BEIGE
+        );
         DrawRectangle(107, 59, 135, 18, BLACK);
         DrawRectangleLines(107, 59, 135, 18, BEIGE);
 }
@@ -67,7 +85,7 @@ void drawInfo(data data, SF_INFO sfinfo)
         DrawText(filename, 115, 25, 14, BEIGE);
 
         char rate[9];
-        int sp = sfinfo.samplerate ? sfinfo.samplerate : 48000;
+        int sp = samplerate;
         snprintf(rate, 9, "%d Hz", sp);
         DrawText(rate, 115, 43, 14, BEIGE);
 
@@ -183,8 +201,7 @@ void sndFileInit(char* rateStr)
         if (!FILE_INITD) {
                 Data.sfName = fName;
                 const int channels = 2;
-                const int samplerate = rateStr != NULL ? atoi(rateStr) : 48000;
-                const int frames = samplerate;
+                //const int frames = samplerate;
 
                 sfinfo.samplerate = samplerate;
                 sfinfo.channels = channels;
@@ -287,7 +304,8 @@ int main(int argc, char *argv[])
         while (!WindowShouldClose()) {
                 Vector2 mousePos = GetMousePosition();
 
-                bool filenameIsHovered = CheckCollisionPointRec(mousePos, (Rectangle){ 107, 23, 135, 18 });
+                bool filenameIsHovered = CheckCollisionPointRec(mousePos, fileNameInput);
+                bool sampleRateIsHovered = CheckCollisionPointRec(mousePos, sampleRateInput);
 
                 transport.newFileBtn.isHovered = CheckCollisionPointRec(mousePos, transport.newFileBtn.bounds);
                 transport.saveFileBtn.isHovered = CheckCollisionPointRec(mousePos, transport.saveFileBtn.bounds);
@@ -301,6 +319,28 @@ int main(int argc, char *argv[])
 
                 if (filenameIsHovered) updateFileName();
                 else SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+
+                if (sampleRateIsHovered)
+                        SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+
+                if (sampleRateIsHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                        // toggle sample rate for now
+                        // sfinfo.samplerate = samplerate;
+                        switch (samplerate) {
+                                case 48000:
+                                samplerate = 44100;
+                                break;
+                                case 44100:
+                                samplerate = 22050;
+                                break;
+                                case 22050:
+                                samplerate = 11025;
+                                break;
+                                default:
+                                samplerate = 48000;
+                                break;
+                        }
+                }
 
                 if (transport.armTrackBtn.isHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
 
