@@ -11,9 +11,11 @@
 #include <pipewire/pipewire.h>
 #include <sndfile.h>
 #include <raylib.h>
+#include <unistd.h>
 
 #define WIDTH 600
 #define HEIGHT 350
+#define MAX_FILE_CHAR 24
 
 static char version[5] = "0.0.3";
 
@@ -76,10 +78,23 @@ float SAMPLE_RIGHT;
 float VOL_RATIO = .1f;
 
 bool FILE_INITD = false;
+bool MOUSE_ON_INPUT = false;
+
+data Data = { 0, };
+
+int rc;
+
+char* rateStr = NULL;
+char* streamTarget = NULL;
+char* path = NULL;
+
+SF_INFO sfinfo = {0};
+
+char fName[MAX_FILE_CHAR+1] = "\0";
+size_t charCount = 0;
 
 pthread_t guiThread;
 pthread_t pipeThread;
-SF_INFO sfinfo = {0};
 
 static void on_process(void *userdata)
 {
@@ -102,8 +117,8 @@ static void on_process(void *userdata)
         n_samples = buf->datas[0].chunk->size / sizeof(float);
 
         /* move cursor up */
-        if (data->move)
-                fprintf(stdout, "%c[%dA", 0x1b, n_channels + 1);
+        //if (data->move)
+        //        fprintf(stdout, "%c[%dA", 0x1b, n_channels + 1);
 
         if (transport.armTrackBtn.isPressed) {
                 //fprintf(stdout, "\n");
@@ -125,7 +140,7 @@ static void on_process(void *userdata)
 
         // Write sample data (total nr samples) to file.
         if (transport.armTrackBtn.isPressed && transport.recTrackBtn.isPressed) {
-                sf_write_float(data->sf, samples, n_samples);
+                if (FILE_INITD && Data.sf != NULL) sf_write_float(Data.sf, samples, n_samples);
 
                 // Keep track of file size.
                 long fsize = 0;
@@ -197,46 +212,48 @@ void drawheader()
         DrawText("Master", 25, 62, 14, BLACK);
 
         DrawRectangle(107, 23, 135, 18, BLACK);
-        DrawRectangleLines(107, 23, 135, 18, BEIGE);
+        DrawRectangleLines(107, 23, 135, 18, RED);
         DrawRectangle(107, 41, 135, 18, BLACK);
         DrawRectangleLines(107, 41, 135, 18, BEIGE);
         DrawRectangle(107, 59, 135, 18, BLACK);
         DrawRectangleLines(107, 59, 135, 18, BEIGE);
 }
 
+void updateFileName()
+{
+        SetMouseCursor(MOUSE_CURSOR_IBEAM);
+        int key = GetCharPressed();
+
+        while (key > 0) {
+                if ((key >= 32) && (key <= 125) && (charCount < MAX_FILE_CHAR)) {
+                        fName[charCount] = (char)key;
+                        fName[charCount+1] = '\0';
+                        charCount++;
+                }
+
+                key = GetCharPressed();
+        }
+
+        if (IsKeyPressed(KEY_BACKSPACE)) {
+                charCount--;
+                if (charCount < 0) charCount = 0;
+                fName[charCount] = '\0';
+        }
+}
+
 void drawInfo(data data, SF_INFO sfinfo)
 {
         drawheader();
-        char* filename = data.sfName;
+        char* filename = fName;
         DrawText(filename, 115, 25, 14, BEIGE);
 
         char rate[9];
-        snprintf(rate, 9, "%d Hz", sfinfo.samplerate);
+        int sp = sfinfo.samplerate ? sfinfo.samplerate : 48000;
+        snprintf(rate, 9, "%d Hz", sp);
         DrawText(rate, 115, 43, 14, BEIGE);
 
         char master[7];
-        int chans = sfinfo.channels;
-        if (chans == 2)
-                snprintf(master, 7, "%s", "Stereo");
-
-        if (chans == 1)
-                snprintf(master, 7, "%s", "Mono  ");
-
-        DrawText(master, 115, 62, 14, BEIGE);
-}
-
-void drawInfoDefault(data data)
-{
-        drawheader();
-        char* filename = "out-recording.wav";
-        DrawText(filename, 115, 25, 14, BEIGE);
-
-        char rate[9];
-        snprintf(rate, 9, "%d Hz", 48000);
-        DrawText(rate, 115, 43, 14, BEIGE);
-
-        char master[7];
-        int chans = 2;
+        int chans = sfinfo.channels ? sfinfo.channels : 2;
         if (chans == 2)
                 snprintf(master, 7, "%s", "Stereo");
 
@@ -279,6 +296,21 @@ void drawVolumeValues()
 
         free(left);
         free(right);
+}
+
+TextureButton newButton(Rectangle bounds, Texture2D texture, Texture2D pressedTexture, Texture2D hoverTexture, Color tint)
+{
+        TextureButton new = {
+                bounds,
+                texture,
+                pressedTexture,
+                hoverTexture,
+                tint,
+                false,
+                false,
+        };
+
+        return new;
 }
 
 void drawControls()
@@ -405,33 +437,30 @@ void* piper(void* arg)
         return NULL;
 }
 
-void sndFileInit(data data, char* path, char* rateStr)
+void sndFileInit(char* rateStr)
 {
-        data.sfName = path != NULL ? path : "out-recording.wav";
-        const int channels = 2;
-        const int samplerate = rateStr != NULL ? atoi(rateStr) : 48000;
-        const int frames = samplerate;
+        if (!FILE_INITD) {
+                Data.sfName = fName;
+                const int channels = 2;
+                const int samplerate = rateStr != NULL ? atoi(rateStr) : 48000;
+                const int frames = samplerate;
 
-        sfinfo.samplerate = samplerate;
-        sfinfo.channels = channels;
-        sfinfo.format = SF_FORMAT_WAV | SF_FORMAT_PCM_32;
-        data.sf = sf_open(data.sfName, SFM_WRITE, &sfinfo);
-        if (!data.sf) {
-            fprintf(stderr, "Error opening file: %s\n", sf_strerror(NULL));
-            return;
+                sfinfo.samplerate = samplerate;
+                sfinfo.channels = channels;
+                sfinfo.format = SF_FORMAT_WAV | SF_FORMAT_PCM_32;
+                Data.sf = sf_open(Data.sfName, SFM_WRITE, &sfinfo);
+                if (!Data.sf) {
+                    fprintf(stderr, "Error opening file: %s\n", sf_strerror(NULL));
+                    return;
+                }
+
+                FILE_INITD = true;
         }
-
-        FILE_INITD = true;
 }
 
-int main(int argc, char *argv[])
+void argHandle()
 {
-        int opt;
-        char* rateStr = NULL;
-        char* streamTarget = NULL;
-        char* path = NULL;
-        int rc;
-
+        //int opt;
         /* while ((opt = getopt_long(argc, argv, "hvfrotg:", options, NULL)) != -1) {
                 switch (opt) {
                         case 'h':
@@ -462,7 +491,10 @@ int main(int argc, char *argv[])
                 }
         }*/
 
-        data data = { 0, };
+}
+
+int main(int argc, char *argv[])
+{
 
         InitWindow(600, 350, "frecorder");
         SetTargetFPS(60);
@@ -485,61 +517,12 @@ int main(int argc, char *argv[])
         Texture2D saveFile = LoadTexture("./assets/save.png");
         Texture2D saveFilePressed = LoadTexture("./assets/save-pressed.png");
 
-        TextureButton stopBtn = {
-                .bounds = { 35, 235, 60, 60 },
-                .texture = stopTrack,
-                .pressedTexture = stopTrackPressed,
-                .hoverTexture = stopTrack,
-                .tint = WHITE,
-                .isHovered = false,
-                .isPressed = false
-        };
-        TextureButton armBtn = {
-                .bounds = { 82, 235, 60, 60 },
-                .texture = armTrack,
-                .pressedTexture = armTrackPressed,
-                .hoverTexture = armTrack,
-                .tint = WHITE,
-                .isHovered = false,
-                .isPressed = false
-        };
-        TextureButton recBtn = {
-                .bounds = { 129, 235, 60, 60 },
-                .texture = recTrack,
-                .pressedTexture = recTrackPressed,
-                .hoverTexture = recTrack,
-                .tint = WHITE,
-                .isHovered = false,
-                .isPressed = false
-        };
-        TextureButton pauseBtn = {
-                .bounds = { 176, 235, 60, 60 },
-                .texture = pauseTrack,
-                .pressedTexture = pauseTrackPressed,
-                .hoverTexture = pauseTrack,
-                .tint = WHITE,
-                .isHovered = false,
-                .isPressed = false
-        };
-
-        TextureButton newBtn = {
-                .bounds = { 310, 235, 60, 30 },
-                .texture = newFile,
-                .pressedTexture = newFilePressed,
-                .hoverTexture = newFile,
-                .tint = WHITE,
-                .isHovered = false,
-                .isPressed = false
-        };
-        TextureButton saveBtn = {
-                .bounds = { 310, 260, 60, 30 },
-                .texture = saveFile,
-                .pressedTexture = saveFilePressed,
-                .hoverTexture = saveFile,
-                .tint = WHITE,
-                .isHovered = false,
-                .isPressed = false
-        };
+        TextureButton stopBtn   = newButton((Rectangle){  35, 235, 60, 60 }, stopTrack, stopTrackPressed, stopTrack, WHITE);
+        TextureButton armBtn    = newButton((Rectangle){  82, 235, 60, 60 }, armTrack, armTrackPressed, armTrack, WHITE);
+        TextureButton recBtn    = newButton((Rectangle){ 129, 235, 60, 60 }, recTrack, recTrackPressed, recTrack, WHITE);
+        TextureButton pauseBtn  = newButton((Rectangle){ 176, 235, 60, 60 }, pauseTrack, pauseTrackPressed, pauseTrack, WHITE);
+        TextureButton newBtn    = newButton((Rectangle){ 310, 235, 60, 30 }, newFile, newFilePressed, newFile, WHITE);
+        TextureButton saveBtn   = newButton((Rectangle){ 310, 260, 60, 30 }, saveFile, saveFilePressed, saveFile, WHITE);
 
         transport.stopTrackBtn = stopBtn;
         transport.armTrackBtn = armBtn;
@@ -550,7 +533,7 @@ int main(int argc, char *argv[])
 
         pw_init(&argc, &argv);
         pipeData *pd = malloc(sizeof(pipeData));
-        pd->dat = data;
+        pd->dat = Data;
         pd->target = streamTarget;
         pd->argc = argc;
         rc = pthread_create(&pipeThread, NULL, piper, pd);
@@ -563,6 +546,8 @@ int main(int argc, char *argv[])
         while (!WindowShouldClose()) {
                 Vector2 mousePos = GetMousePosition();
 
+                bool filenameIsHovered = CheckCollisionPointRec(mousePos, (Rectangle){ 107, 23, 135, 18 });
+
                 transport.newFileBtn.isHovered = CheckCollisionPointRec(mousePos, transport.newFileBtn.bounds);
                 transport.saveFileBtn.isHovered = CheckCollisionPointRec(mousePos, transport.saveFileBtn.bounds);
                 transport.pauseTrackBtn.isHovered = CheckCollisionPointRec(mousePos, transport.pauseTrackBtn.bounds);
@@ -573,12 +558,16 @@ int main(int argc, char *argv[])
                 transport.saveFileBtn.isPressed = false;
                 transport.newFileBtn.isPressed = false;
 
+                if (filenameIsHovered) updateFileName();
+                else SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+
                 if (transport.armTrackBtn.isHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                        sndFileInit(data, path, rateStr);
+
                         if (transport.armTrackBtn.isPressed) {
                                 transport.armTrackBtn.isPressed = false;
                         } else {
                                 transport.armTrackBtn.isPressed = true;
+                                sndFileInit(rateStr);
                         }
                 }
 
@@ -632,10 +621,7 @@ int main(int argc, char *argv[])
                 DrawTexture(backgroundTexture, 0, 0, WHITE);
                 DrawTexture(screenTexture, 20, 20, ORANGE);
                 DrawRectangleLines(20, 20, 425, 150, BLACK);
-                if (FILE_INITD)
-                  drawInfo(data, sfinfo);
-                else
-                  drawInfoDefault(data);
+                drawInfo(Data, sfinfo);
                 drawVolumeMeters(faderTexture);
                 drawVolumeValues();
                 DrawTexture(transportTexture, 20, 220, WHITE);
@@ -647,8 +633,8 @@ int main(int argc, char *argv[])
 
         pthread_detach(guiThread);
         pthread_join(pipeThread, NULL);
-        pw_stream_destroy(data.stream);
-        pw_main_loop_destroy(data.loop);
+        pw_stream_destroy(Data.stream);
+        pw_main_loop_destroy(Data.loop);
         pw_deinit();
         UnloadTexture(stopTrack);
         UnloadTexture(armTrack);
