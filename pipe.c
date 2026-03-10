@@ -1,3 +1,10 @@
+/*
+ * The functions in this file were taken and adapted from
+ * the pipewire example:
+ *
+ * - https://docs.pipewire.org/audio-capture_8c-example.html
+ */
+
 #include <pipewire-0.3/pipewire/thread-loop.h>
 #include <pipewire/pipewire.h>
 #include <math.h>
