@@ -240,23 +240,23 @@ int main(int argc, char *argv[])
         InitWindow(600, 350, "frecorder");
         SetTargetFPS(60);
         Texture2D backgroundTexture = LoadTexture("./assets/Background.png");
-        Texture2D screenTexture = LoadTexture("./assets/Screen.png");
-        Texture2D transportTexture = LoadTexture("./assets/Transport.png");
-        Texture2D faderTexture = LoadTexture("./assets/Fader.png");
+        Texture2D screenTexture     = LoadTexture("./assets/Screen.png");
+        Texture2D transportTexture  = LoadTexture("./assets/Transport.png");
+        Texture2D faderTexture      = LoadTexture("./assets/Fader.png");
 
-        Texture2D armTrack = LoadTexture("./assets/arm-track.png");
-        Texture2D armTrackPressed = LoadTexture("./assets/arm-track-pressed.png");
-        Texture2D recTrack = LoadTexture("./assets/play.png");
-        Texture2D recTrackPressed = LoadTexture("./assets/play-pressed.png");
-        Texture2D stopTrack = LoadTexture("./assets/stop-track.png");
-        Texture2D stopTrackPressed = LoadTexture("./assets/stop-track-pressed.png");
-        Texture2D pauseTrack = LoadTexture("./assets/pause-track.png");
+        Texture2D armTrack          = LoadTexture("./assets/arm-track.png");
+        Texture2D armTrackPressed   = LoadTexture("./assets/arm-track-pressed.png");
+        Texture2D recTrack          = LoadTexture("./assets/play.png");
+        Texture2D recTrackPressed   = LoadTexture("./assets/play-pressed.png");
+        Texture2D stopTrack         = LoadTexture("./assets/stop-track.png");
+        Texture2D stopTrackPressed  = LoadTexture("./assets/stop-track-pressed.png");
+        Texture2D pauseTrack        = LoadTexture("./assets/pause-track.png");
         Texture2D pauseTrackPressed = LoadTexture("./assets/pause-track-pressed.png");
 
-        Texture2D newFile = LoadTexture("./assets/new.png");
-        Texture2D newFilePressed = LoadTexture("./assets/new-pressed.png");
-        Texture2D saveFile = LoadTexture("./assets/save.png");
-        Texture2D saveFilePressed = LoadTexture("./assets/save-pressed.png");
+        Texture2D newFile           = LoadTexture("./assets/new.png");
+        Texture2D newFilePressed    = LoadTexture("./assets/new-pressed.png");
+        Texture2D saveFile          = LoadTexture("./assets/save.png");
+        Texture2D saveFilePressed   = LoadTexture("./assets/save-pressed.png");
 
         TextureButton stopBtn   = newButton((Rectangle){  35, 235, 60, 60 }, stopTrack, stopTrackPressed, stopTrack, WHITE);
         TextureButton armBtn    = newButton((Rectangle){  82, 235, 60, 60 }, armTrack, armTrackPressed, armTrack, WHITE);
@@ -265,12 +265,12 @@ int main(int argc, char *argv[])
         TextureButton newBtn    = newButton((Rectangle){ 310, 235, 60, 30 }, newFile, newFilePressed, newFile, WHITE);
         TextureButton saveBtn   = newButton((Rectangle){ 310, 260, 60, 30 }, saveFile, saveFilePressed, saveFile, WHITE);
 
-        transport.stopTrackBtn = stopBtn;
-        transport.armTrackBtn = armBtn;
-        transport.recTrackBtn = recBtn;
+        transport.stopTrackBtn  = stopBtn;
+        transport.armTrackBtn   = armBtn;
+        transport.recTrackBtn   = recBtn;
         transport.pauseTrackBtn = pauseBtn;
-        transport.saveFileBtn = saveBtn;
-        transport.newFileBtn = newBtn;
+        transport.saveFileBtn   = saveBtn;
+        transport.newFileBtn    = newBtn;
 
         pw_init(&argc, &argv);
         pipeData *pd = malloc(sizeof(pipeData));
