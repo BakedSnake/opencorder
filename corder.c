@@ -1,10 +1,13 @@
 #include <pthread.h>
+#include <stdio.h>
 #include "./pipe.c"
 
 static char version[5] = "0.0.4";
 
 int rc;
 
+char* PATH;
+char* SAVE_PATH="/extra/Music/";
 char* rateStr = NULL;
 char* streamTarget = NULL;
 char* path = NULL;
@@ -24,6 +27,7 @@ Rectangle sampleRateInput = (Rectangle){ 107, 41, 135, 18 };
 Rectangle channelsInput = (Rectangle){ 107, 59, 135, 18 };
 
 Rectangle newFileInput = (Rectangle){ 310, 235, 60, 30 };
+Rectangle saveFileInput = (Rectangle){ 310, 260, 60, 30 };
 
 void drawheader()
 {
@@ -208,7 +212,6 @@ void sndFileInit(char* rateStr)
 {
         if (!FILE_INITD) {
                 Data.sfName = fName;
-                //const int frames = samplerate;
 
                 sfinfo.samplerate = samplerate;
                 sfinfo.channels = channels;
@@ -221,6 +224,33 @@ void sndFileInit(char* rateStr)
 
                 FILE_INITD = true;
         }
+}
+
+void copyFile(char* targetPath)
+{
+        char ch;
+        FILE *source, *target;
+
+        source = fopen(PATH, "r");
+        if (source == NULL) {
+                fprintf(stderr, "Source file could not be opened.\n");
+                return;
+        }
+
+        target = fopen(targetPath, "w");
+        if (target == NULL) {
+                fclose(source);
+                fprintf(stderr, "Target file could not be opened.\n");
+                return;
+        }
+
+        while ((ch = fgetc(source)) != EOF) {
+                fputc(ch, target);
+        }
+
+        printf("File copied successfully.\n");
+        fclose(source);
+        fclose(target);
 }
 
 void argHandle()
@@ -314,17 +344,18 @@ int main(int argc, char *argv[])
                 bool filenameIsHovered = CheckCollisionPointRec(mousePos, fileNameInput);
                 bool sampleRateIsHovered = CheckCollisionPointRec(mousePos, sampleRateInput);
                 bool channelsIsHovered = CheckCollisionPointRec(mousePos, channelsInput);
-                bool newIsHovered = CheckCollisionPointRec(mousePos, newFileInput);
 
-                transport.newFileBtn.isHovered = CheckCollisionPointRec(mousePos, transport.newFileBtn.bounds);
-                transport.saveFileBtn.isHovered = CheckCollisionPointRec(mousePos, transport.saveFileBtn.bounds);
+                transport.newFileBtn.isHovered    = CheckCollisionPointRec(mousePos, transport.newFileBtn.bounds);
+                transport.saveFileBtn.isHovered   = CheckCollisionPointRec(mousePos, transport.saveFileBtn.bounds);
                 transport.pauseTrackBtn.isHovered = CheckCollisionPointRec(mousePos, transport.pauseTrackBtn.bounds);
-                transport.armTrackBtn.isHovered = CheckCollisionPointRec(mousePos, transport.armTrackBtn.bounds);
-                transport.recTrackBtn.isHovered = CheckCollisionPointRec(mousePos, transport.recTrackBtn.bounds);
-                transport.stopTrackBtn.isHovered = CheckCollisionPointRec(mousePos, transport.stopTrackBtn.bounds);
-                transport.stopTrackBtn.isPressed = false;
-                transport.saveFileBtn.isPressed = false;
-                transport.newFileBtn.isPressed = false;
+                transport.armTrackBtn.isHovered   = CheckCollisionPointRec(mousePos, transport.armTrackBtn.bounds);
+                transport.recTrackBtn.isHovered   = CheckCollisionPointRec(mousePos, transport.recTrackBtn.bounds);
+                transport.stopTrackBtn.isHovered  = CheckCollisionPointRec(mousePos, transport.stopTrackBtn.bounds);
+                transport.newFileBtn.isHovered    = CheckCollisionPointRec(mousePos, transport.newFileBtn.bounds);
+                transport.saveFileBtn.isHovered   = CheckCollisionPointRec(mousePos, transport.saveFileBtn.bounds);
+                transport.stopTrackBtn.isPressed  = false;
+                transport.saveFileBtn.isPressed   = false;
+                transport.newFileBtn.isPressed    = false;
 
                 if (filenameIsHovered) updateFileName();
                 else SetMouseCursor(MOUSE_CURSOR_DEFAULT);
@@ -364,18 +395,6 @@ int main(int argc, char *argv[])
                                 channels = 2;
                                 break;
                         }
-                }
-
-                if (newIsHovered)
-                        SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
-
-                if (newIsHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                        FILE_INITD = false;
-                        memset(fName, 0, sizeof(fName) - 1);
-                        charCount = 0;
-                        sf_close(Data.sf);
-                        samplerate = 48000;
-                        channels = 2;
                 }
 
                 if (transport.armTrackBtn.isHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
@@ -427,11 +446,25 @@ int main(int argc, char *argv[])
                         FILE_INITD = false;
                 }
 
-                if (transport.saveFileBtn.isHovered && IsMouseButtonDown(MOUSE_LEFT_BUTTON))
-                        transport.saveFileBtn.isPressed = true;
+                if (transport.newFileBtn.isHovered)
+                        SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
 
-                if (transport.newFileBtn.isHovered && IsMouseButtonDown(MOUSE_LEFT_BUTTON))
+                if (transport.newFileBtn.isHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                         transport.newFileBtn.isPressed = true;
+                        FILE_INITD = false;
+                        memset(fName, 0, sizeof(fName) - 1);
+                        charCount = 0;
+                        sf_close(Data.sf);
+                        samplerate = 48000;
+                        channels = 2;
+                }
+
+                if (transport.saveFileBtn.isHovered)
+                        SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+
+                if (transport.saveFileBtn.isHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                        transport.saveFileBtn.isPressed = true;
+                }
 
                 BeginDrawing();
                 ClearBackground(BLACK);
