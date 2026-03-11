@@ -1,5 +1,4 @@
 #include <pthread.h>
-
 #include "./pipe.c"
 
 static char version[5] = "0.0.4";
@@ -14,14 +13,17 @@ SF_INFO sfinfo = {0};
 
 char fName[MAX_FILE_CHAR+1] = "\0";
 size_t charCount = 0;
+int samplerate = 48000;
+int channels = 2;
 
 pthread_t guiThread;
 pthread_t pipeThread;
 
 Rectangle fileNameInput = (Rectangle){ 107, 23, 135, 18 };
 Rectangle sampleRateInput = (Rectangle){ 107, 41, 135, 18 };
+Rectangle channelsInput = (Rectangle){ 107, 59, 135, 18 };
 
-int samplerate = 48000;
+Rectangle newFileInput = (Rectangle){ 310, 235, 60, 30 };
 
 void drawheader()
 {
@@ -52,8 +54,14 @@ void drawheader()
                         sampleRateInput.height,
                         BEIGE
         );
+        // channels
         DrawRectangle(107, 59, 135, 18, BLACK);
-        DrawRectangleLines(107, 59, 135, 18, BEIGE);
+        DrawRectangleLines(channelsInput.x,
+                        channelsInput.y,
+                        channelsInput.width,
+                        channelsInput.height,
+                        BEIGE
+        );
 }
 
 void updateFileName()
@@ -90,7 +98,7 @@ void drawInfo(data data, SF_INFO sfinfo)
         DrawText(rate, 115, 43, 14, BEIGE);
 
         char master[7];
-        int chans = sfinfo.channels ? sfinfo.channels : 2;
+        int chans = channels;
         if (chans == 2)
                 snprintf(master, 7, "%s", "Stereo");
 
@@ -200,7 +208,6 @@ void sndFileInit(char* rateStr)
 {
         if (!FILE_INITD) {
                 Data.sfName = fName;
-                const int channels = 2;
                 //const int frames = samplerate;
 
                 sfinfo.samplerate = samplerate;
@@ -306,6 +313,8 @@ int main(int argc, char *argv[])
 
                 bool filenameIsHovered = CheckCollisionPointRec(mousePos, fileNameInput);
                 bool sampleRateIsHovered = CheckCollisionPointRec(mousePos, sampleRateInput);
+                bool channelsIsHovered = CheckCollisionPointRec(mousePos, channelsInput);
+                bool newIsHovered = CheckCollisionPointRec(mousePos, newFileInput);
 
                 transport.newFileBtn.isHovered = CheckCollisionPointRec(mousePos, transport.newFileBtn.bounds);
                 transport.saveFileBtn.isHovered = CheckCollisionPointRec(mousePos, transport.saveFileBtn.bounds);
@@ -340,6 +349,33 @@ int main(int argc, char *argv[])
                                 samplerate = 48000;
                                 break;
                         }
+                }
+
+                if (channelsIsHovered)
+                        SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+
+                if (channelsIsHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                        // sfinfo.channels = samplerate;
+                        switch (channels) {
+                                case 2:
+                                channels = 1;
+                                break;
+                                default:
+                                channels = 2;
+                                break;
+                        }
+                }
+
+                if (newIsHovered)
+                        SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+
+                if (newIsHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                        FILE_INITD = false;
+                        memset(fName, 0, sizeof(fName) - 1);
+                        charCount = 0;
+                        sf_close(Data.sf);
+                        samplerate = 48000;
+                        channels = 2;
                 }
 
                 if (transport.armTrackBtn.isHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
@@ -410,7 +446,6 @@ int main(int argc, char *argv[])
                 drawControls();
                 EndDrawing();
         }
-
 
         pthread_detach(guiThread);
         pthread_join(pipeThread, NULL);
