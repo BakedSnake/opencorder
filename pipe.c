@@ -10,8 +10,9 @@
 #include <math.h>
 #include <signal.h>
 
-#include "pipe.h"
 #include "corder.h"
+#include "pipe.h"
+#include "ui.h"
 
 static void on_process(void *userdata)
 {
