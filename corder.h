@@ -2,9 +2,13 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#define WIDTH 600
-#define HEIGHT 350
-#define MAX_FILE_CHAR 24
+#define MONO                    1
+#define STEREO                  2
+#define MAX_FILE_CHAR           24
+#define SAMPLING_RATE_48K       48000
+#define SAMPLING_RATE_44K       44100
+#define SAMPLING_RATE_22K       22050
+#define SAMPLING_RATE_11K       11025
 
 extern float SAMPLE_LEFT;
 extern float SAMPLE_RIGHT;
@@ -19,6 +23,8 @@ extern size_t charCount;
 extern int samplerate;
 extern int channels;
 
+static char version[6] = "0.0.7";
+
 static struct option options[] = {
   {"help",              no_argument,            0, 'h'},
   {"version",           no_argument,            0, 'v'},
@@ -27,6 +33,7 @@ static struct option options[] = {
   {"output",            required_argument,      0, 'o'},
   {"target",            required_argument,      0, 't'},
   {"nogui",             no_argument,            0, 'n'},
+  {"channels",          required_argument,      0, 'c'},
   {0,                   0,                      0,  0 }
 };
 
