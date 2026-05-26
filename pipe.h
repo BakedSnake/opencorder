@@ -11,6 +11,8 @@ typedef struct data {
         char *sfName;
 } data;
 
+extern data Data;
+
 typedef struct pipeData {
         struct data dat;
         char* target;
@@ -23,3 +25,4 @@ typedef struct State {
         bool isPaused;
 } State;
 
+void* piper(void* arg);
