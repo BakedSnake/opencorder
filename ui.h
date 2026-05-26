@@ -1,6 +1,20 @@
 #include <raylib.h>
 #include <sndfile.h>
 
+/* Main */
+#define FPS                     60
+#define WIDTH                   600
+#define HEIGHT                  350
+#define SCREEN_X                20
+#define SCREEN_Y                20
+#define SCREEN_W                425
+#define SCREEN_H                150
+#define SCREEN_BORDER_C         BLACK
+#define TRANSPORT_X             20
+#define TRANSPORT_Y             220
+#define TRANSPORT_W             425
+#define TRANSPORT_H             75
+#define TRANSPORT_BORDER_C      BLACK
 /* Header */
 #define HEADER_X                23
 #define HEADER_TEXT_X           25
@@ -48,6 +62,9 @@
 #define RIGHT_VOLUME_VALUE_S    14
 #define RIGHT_VOLUME_VALUE_C    RED
 //* Buttons *//
+#define BTN_W                   60
+#define BTN_H                   60
+#define SMALL_BTN_H             30
 #define HIGH_BTN_Y              235
 #define LOW_BTN_Y               260
 #define NEW_BTN_X               310
