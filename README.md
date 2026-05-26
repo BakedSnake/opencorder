@@ -1,6 +1,8 @@
 # Opencorder - A pipewire audio recorder
-
 An internal audio recorder that uses a pipewire monitor to record audio that is currently being played.
+
+## Note
+This project is still a work in progress. Once there is a stable build, it will be added as a release.
 
 ## Dependencies
 - [pipewire](https://www.pipewire.org/)
