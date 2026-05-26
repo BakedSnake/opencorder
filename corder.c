@@ -1,43 +1,37 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <pipewire/pipewire.h>
-
 #include "corder.h"
 #include "pipe.h"
 #include "ui.h"
 
-static char version[5] = "0.0.7";
-
+int rc;
 float SAMPLE_LEFT;
 float SAMPLE_RIGHT;
-float VOL_RATIO = .1f;
-
-bool GUI_DISABLE = false;
-bool FILE_INITD = false;
-bool MOUSE_ON_INPUT = false;
-
-Transport transport;
-
-data Data = { 0 };
-
-int rc;
-
 char* PATH;
-char* SAVE_PATH="/extra/Music/";
-char* rateStr = NULL;
-char* streamTarget = NULL;
-char* path = NULL;
-
-SF_INFO sfinfo = {0};
-
-char fName[MAX_FILE_CHAR+1] = "\0";
-size_t charCount = 0;
-int samplerate = 48000;
-int channels = 2;
 
 pthread_t guiThread;
 pthread_t pipeThread;
+Transport transport;
+
+float VOL_RATIO                 = .1f;
+bool GUI_DISABLE                = false;
+bool FILE_INITD                 = false;
+bool MOUSE_ON_INPUT             = false;
+char* SAVE_PATH                 = "/extra/Music/";
+
+data Data                       = { 0 };
+SF_INFO sfinfo                  = { 0 };
+
+size_t charCount                = 0;
+int samplerate                  = SAMPLING_RATE_48K;
+int channels                    = STEREO;
+char* rateStr                   = NULL;
+char* streamTarget              = NULL;
+char* path                      = NULL;
+char fName[MAX_FILE_CHAR+1]     = "\0";
 
 void updateFileName()
 {
@@ -109,7 +103,7 @@ void copyFile(char* targetPath)
 void argHandle(int argc, char* argv[])
 {
         int opt;
-        while ((opt = getopt_long(argc, argv, "hvfrotn:", options, NULL)) != -1) {
+        while ((opt = getopt_long(argc, argv, "hvfrotnc:", options, NULL)) != -1) {
                 switch (opt) {
                         case 'h':
                                 printf("Usage: ...\n");
@@ -134,6 +128,10 @@ void argHandle(int argc, char* argv[])
                                 break;
                         case 'n':
                                 GUI_DISABLE = true;
+                                break;
+                        case 'c':
+                                if (atoi(optarg) != 0)
+                                        channels = atoi(optarg);
                                 break;
                         case '?':
                                 default:
@@ -167,8 +165,8 @@ int main(int argc, char *argv[])
 
         }
 
-        InitWindow(600, 350, "opencorder");
-        SetTargetFPS(60);
+        InitWindow(WIDTH, HEIGHT, "opencorder");
+        SetTargetFPS(FPS);
         Texture2D backgroundTexture = LoadTexture("/usr/share/opencorder/assets/Background.png");
         Texture2D screenTexture     = LoadTexture("/usr/share/opencorder/assets/Screen.png");
         Texture2D transportTexture  = LoadTexture("/usr/share/opencorder/assets/Transport.png");
@@ -188,12 +186,18 @@ int main(int argc, char *argv[])
         Texture2D saveFile          = LoadTexture("/usr/share/opencorder/assets/save.png");
         Texture2D saveFilePressed   = LoadTexture("/usr/share/opencorder/assets/save-pressed.png");
 
-        TextureButton stopBtn   = newButton((Rectangle){  35, 235, 60, 60 }, stopTrack, stopTrackPressed, stopTrack, WHITE);
-        TextureButton armBtn    = newButton((Rectangle){  82, 235, 60, 60 }, armTrack, armTrackPressed, armTrack, WHITE);
-        TextureButton recBtn    = newButton((Rectangle){ 129, 235, 60, 60 }, recTrack, recTrackPressed, recTrack, WHITE);
-        TextureButton pauseBtn  = newButton((Rectangle){ 176, 235, 60, 60 }, pauseTrack, pauseTrackPressed, pauseTrack, WHITE);
-        TextureButton newBtn    = newButton((Rectangle){ 310, 235, 60, 30 }, newFile, newFilePressed, newFile, WHITE);
-        TextureButton saveBtn   = newButton((Rectangle){ 310, 260, 60, 30 }, saveFile, saveFilePressed, saveFile, WHITE);
+        TextureButton stopBtn   = newButton((Rectangle){ STOP_BTN_X,    HIGH_BTN_Y, BTN_W, BTN_H        },
+                        stopTrack, stopTrackPressed, stopTrack, WHITE);
+        TextureButton armBtn    = newButton((Rectangle){ ARM_BTN_X,     HIGH_BTN_Y, BTN_W, BTN_H        },
+                        armTrack, armTrackPressed, armTrack, WHITE);
+        TextureButton recBtn    = newButton((Rectangle){ REC_BTN_X,     HIGH_BTN_Y, BTN_W, BTN_H        },
+                        recTrack, recTrackPressed, recTrack, WHITE);
+        TextureButton pauseBtn  = newButton((Rectangle){ PAUSE_BTN_X,   HIGH_BTN_Y, BTN_W, BTN_H        },
+                        pauseTrack, pauseTrackPressed, pauseTrack, WHITE);
+        TextureButton newBtn    = newButton((Rectangle){ NEW_BTN_X,     HIGH_BTN_Y, BTN_W, SMALL_BTN_H  },
+                        newFile, newFilePressed, newFile, WHITE);
+        TextureButton saveBtn   = newButton((Rectangle){ SAVE_BTN_X,    LOW_BTN_Y, BTN_W,  SMALL_BTN_H  },
+                        saveFile, saveFilePressed, saveFile, WHITE);
 
         transport.stopTrackBtn  = stopBtn;
         transport.armTrackBtn   = armBtn;
@@ -231,17 +235,17 @@ int main(int argc, char *argv[])
                         // toggle sample rate for now
                         // sfinfo.samplerate = samplerate;
                         switch (samplerate) {
-                                case 48000:
-                                samplerate = 44100;
+                                case SAMPLING_RATE_48K:
+                                samplerate = SAMPLING_RATE_44K;
                                 break;
-                                case 44100:
-                                samplerate = 22050;
+                                case SAMPLING_RATE_44K:
+                                samplerate = SAMPLING_RATE_22K;
                                 break;
-                                case 22050:
-                                samplerate = 11025;
+                                case SAMPLING_RATE_22K:
+                                samplerate = SAMPLING_RATE_11K;
                                 break;
                                 default:
-                                samplerate = 48000;
+                                samplerate = SAMPLING_RATE_48K;
                                 break;
                         }
                 }
@@ -252,11 +256,11 @@ int main(int argc, char *argv[])
                 if (channelsIsHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                         // sfinfo.channels = samplerate;
                         switch (channels) {
-                                case 2:
-                                channels = 1;
+                                case STEREO:
+                                channels = MONO;
                                 break;
                                 default:
-                                channels = 2;
+                                channels = STEREO;
                                 break;
                         }
                 }
@@ -319,8 +323,8 @@ int main(int argc, char *argv[])
                         memset(fName, 0, sizeof(fName) - 1);
                         charCount = 0;
                         sf_close(Data.sf);
-                        samplerate = 48000;
-                        channels = 2;
+                        samplerate = SAMPLING_RATE_48K;
+                        channels = STEREO;
                 }
 
                 if (transport.saveFileBtn.isHovered)
@@ -333,13 +337,13 @@ int main(int argc, char *argv[])
                 BeginDrawing();
                 ClearBackground(BLACK);
                 DrawTexture(backgroundTexture, 0, 0, WHITE);
-                DrawTexture(screenTexture, 20, 20, ORANGE);
-                DrawRectangleLines(20, 20, 425, 150, BLACK);
+                DrawTexture(screenTexture, SCREEN_X, SCREEN_Y, WHITE);
+                DrawRectangleLines(SCREEN_X, SCREEN_Y, SCREEN_W, SCREEN_H, SCREEN_BORDER_C);
                 drawInfo(&Data, sfinfo);
                 drawVolumeMeters(faderTexture);
                 drawVolumeValues();
-                DrawTexture(transportTexture, 20, 220, WHITE);
-                DrawRectangleLines(20, 220, 425, 75, BLACK);
+                DrawTexture(transportTexture, TRANSPORT_X, TRANSPORT_Y, WHITE);
+                DrawRectangleLines(TRANSPORT_X, TRANSPORT_Y, TRANSPORT_W, TRANSPORT_H, BLACK);
                 drawControls();
                 EndDrawing();
         }
