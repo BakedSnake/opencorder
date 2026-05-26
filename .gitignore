@@ -1,3 +1,6 @@
-out-recording.wav
-pv
-corder
+/out-recording.wav
+/recording.wav
+/corder.o
+/pipe.o
+/ui.o
+/corder
