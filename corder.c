@@ -1,8 +1,24 @@
 #include <pthread.h>
 #include <stdio.h>
-#include "./pipe.c"
+#include <string.h>
+#include <pipewire/pipewire.h>
+
+#include "corder.h"
+#include "pipe.h"
 
 static char version[5] = "0.0.4";
+
+float SAMPLE_LEFT;
+float SAMPLE_RIGHT;
+float VOL_RATIO = .1f;
+
+bool GUI_DISABLE = false;
+bool FILE_INITD = false;
+bool MOUSE_ON_INPUT = false;
+
+Transport transport;
+
+data Data = { 0 };
 
 int rc;
 
@@ -253,26 +269,25 @@ void copyFile(char* targetPath)
         fclose(target);
 }
 
-void argHandle()
+void argHandle(int argc, char* argv[])
 {
-        //int opt;
-        /* while ((opt = getopt_long(argc, argv, "hvfrotg:", options, NULL)) != -1) {
+        int opt;
+        while ((opt = getopt_long(argc, argv, "hvfrotn:", options, NULL)) != -1) {
                 switch (opt) {
                         case 'h':
                                 printf("Usage: ...\n");
-                                return 0;
+                                return;
                         case 'v':
                                 printf("Version: %s\n", version);
-                                return 0;
-                        case 'g':
-                                rc = pthread_create(&guiThread, NULL, guiStart, NULL);
-                                if (rc < 0) {
-                                        fprintf(stdout, "\n");
-                                        return 1;
-                                }
-                                break;
+                                return;
                         case 'o':
                                 path = optarg;
+                                transport.armTrackBtn.isPressed = true;
+                                transport.recTrackBtn.isPressed = true;
+                                if (path) strncpy(fName, path, MAX_FILE_CHAR);
+                                else strncpy(fName, "recording.wav", MAX_FILE_CHAR);
+                                fName[MAX_FILE_CHAR] = '\0';
+                                sndFileInit(rateStr);
                                 break;
                         case 'r':
                                 rateStr = optarg;
@@ -280,37 +295,61 @@ void argHandle()
                         case 't':
                                 streamTarget = optarg;
                                 break;
+                        case 'n':
+                                GUI_DISABLE = true;
+                                break;
                         case '?':
                                 default:
                                 break;
-                }
-        }*/
+               }
+        }
 
 }
 
 int main(int argc, char *argv[])
 {
+        argHandle(argc, argv);
+        pw_init(&argc, &argv);
+        pipeData *pd = malloc(sizeof(pipeData));
+        pd->dat = Data;
+        pd->target = streamTarget;
+        pd->argc = argc;
 
-        InitWindow(600, 350, "frecorder");
+        if (GUI_DISABLE) {
+                piper(pd);
+                if (Data.sf) sf_close(Data.sf);
+                pw_deinit();
+                return 0;
+        } else {
+                rc = pthread_create(&pipeThread, NULL, piper, pd);
+                if (rc < 0) {
+                        fprintf(stdout, "\n");
+                        free(pd);
+                        return 1;
+                }
+
+        }
+
+        InitWindow(600, 350, "opencorder");
         SetTargetFPS(60);
-        Texture2D backgroundTexture = LoadTexture("./assets/Background.png");
-        Texture2D screenTexture     = LoadTexture("./assets/Screen.png");
-        Texture2D transportTexture  = LoadTexture("./assets/Transport.png");
-        Texture2D faderTexture      = LoadTexture("./assets/Fader.png");
+        Texture2D backgroundTexture = LoadTexture("/usr/share/opencorder/assets/Background.png");
+        Texture2D screenTexture     = LoadTexture("/usr/share/opencorder/assets/Screen.png");
+        Texture2D transportTexture  = LoadTexture("/usr/share/opencorder/assets/Transport.png");
+        Texture2D faderTexture      = LoadTexture("/usr/share/opencorder/assets/Fader.png");
 
-        Texture2D armTrack          = LoadTexture("./assets/arm-track.png");
-        Texture2D armTrackPressed   = LoadTexture("./assets/arm-track-pressed.png");
-        Texture2D recTrack          = LoadTexture("./assets/play.png");
-        Texture2D recTrackPressed   = LoadTexture("./assets/play-pressed.png");
-        Texture2D stopTrack         = LoadTexture("./assets/stop-track.png");
-        Texture2D stopTrackPressed  = LoadTexture("./assets/stop-track-pressed.png");
-        Texture2D pauseTrack        = LoadTexture("./assets/pause-track.png");
-        Texture2D pauseTrackPressed = LoadTexture("./assets/pause-track-pressed.png");
+        Texture2D armTrack          = LoadTexture("/usr/share/opencorder/assets/arm-track.png");
+        Texture2D armTrackPressed   = LoadTexture("/usr/share/opencorder/assets/arm-track-pressed.png");
+        Texture2D recTrack          = LoadTexture("/usr/share/opencorder/assets/play.png");
+        Texture2D recTrackPressed   = LoadTexture("/usr/share/opencorder/assets/play-pressed.png");
+        Texture2D stopTrack         = LoadTexture("/usr/share/opencorder/assets/stop-track.png");
+        Texture2D stopTrackPressed  = LoadTexture("/usr/share/opencorder/assets/stop-track-pressed.png");
+        Texture2D pauseTrack        = LoadTexture("/usr/share/opencorder/assets/pause-track.png");
+        Texture2D pauseTrackPressed = LoadTexture("/usr/share/opencorder/assets/pause-track-pressed.png");
 
-        Texture2D newFile           = LoadTexture("./assets/new.png");
-        Texture2D newFilePressed    = LoadTexture("./assets/new-pressed.png");
-        Texture2D saveFile          = LoadTexture("./assets/save.png");
-        Texture2D saveFilePressed   = LoadTexture("./assets/save-pressed.png");
+        Texture2D newFile           = LoadTexture("/usr/share/opencorder/assets/new.png");
+        Texture2D newFilePressed    = LoadTexture("/usr/share/opencorder/assets/new-pressed.png");
+        Texture2D saveFile          = LoadTexture("/usr/share/opencorder/assets/save.png");
+        Texture2D saveFilePressed   = LoadTexture("/usr/share/opencorder/assets/save-pressed.png");
 
         TextureButton stopBtn   = newButton((Rectangle){  35, 235, 60, 60 }, stopTrack, stopTrackPressed, stopTrack, WHITE);
         TextureButton armBtn    = newButton((Rectangle){  82, 235, 60, 60 }, armTrack, armTrackPressed, armTrack, WHITE);
@@ -326,19 +365,7 @@ int main(int argc, char *argv[])
         transport.saveFileBtn   = saveBtn;
         transport.newFileBtn    = newBtn;
 
-        pw_init(&argc, &argv);
-        pipeData *pd = malloc(sizeof(pipeData));
-        pd->dat = Data;
-        pd->target = streamTarget;
-        pd->argc = argc;
-        rc = pthread_create(&pipeThread, NULL, piper, pd);
-        if (rc < 0) {
-                fprintf(stdout, "\n");
-                free(pd);
-                return 1;
-        }
-
-        while (!WindowShouldClose()) {
+        while (!WindowShouldClose() && !GUI_DISABLE) {
                 Vector2 mousePos = GetMousePosition();
 
                 bool filenameIsHovered = CheckCollisionPointRec(mousePos, fileNameInput);
