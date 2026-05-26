@@ -7,7 +7,7 @@ CC = clang
 CFLAGS = -Wall $(shell pkg-config --cflags libpipewire-0.3 libspa-0.2)
 LDFLAGS = $(shell pkg-config --libs libpipewire-0.3 libspa-0.2)
 LIBS := -lm -lsndfile -lraylib
-SOURCES = corder.c pipe.c
+SOURCES = corder.c pipe.c ui.c
 ASSETS = assets/*
 OBJECTS = $(SOURCES:.c=.o)
 TARGET = corder
