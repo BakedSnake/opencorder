@@ -6,7 +6,7 @@
 #include "corder.h"
 #include "pipe.h"
 
-static char version[5] = "0.0.4";
+static char version[5] = "0.0.7";
 
 float SAMPLE_LEFT;
 float SAMPLE_RIGHT;
