@@ -10,19 +10,8 @@
 #include <math.h>
 #include <signal.h>
 
-#include "./pipe.h"
-#include "./corder.h"
-
-data Data = { 0, };
-
-float SAMPLE_LEFT;
-float SAMPLE_RIGHT;
-float VOL_RATIO = .1f;
-
-bool FILE_INITD = false;
-bool MOUSE_ON_INPUT = false;
-
-Transport transport;
+#include "pipe.h"
+#include "corder.h"
 
 static void on_process(void *userdata)
 {
@@ -45,11 +34,15 @@ static void on_process(void *userdata)
         n_samples = buf->datas[0].chunk->size / sizeof(float);
 
         /* move cursor up */
-        //if (data->move)
-        //        fprintf(stdout, "%c[%dA", 0x1b, n_channels + 1);
+        if (GUI_DISABLE) {
+          if (data->move)
+                  fprintf(stdout, "%c[%dA", 0x1b, n_channels + 1);
+        }
 
         if (transport.armTrackBtn.isPressed) {
-                //fprintf(stdout, "\n");
+                if (GUI_DISABLE)
+                        fprintf(stdout, "\n");
+
                 for (c = 0; c < data->format.info.raw.channels; c++) {
                         max = 0.0f;
                         for (n = c; n < n_samples; n += n_channels) {
@@ -59,10 +52,16 @@ static void on_process(void *userdata)
                         SAMPLE_LEFT = c == 0 ? samples[0] / VOL_RATIO : SAMPLE_LEFT;
                         SAMPLE_RIGHT = c == 1 ? samples[1] / VOL_RATIO : SAMPLE_RIGHT;
 
-                        //peak = (uint32_t)SPA_CLAMPF(max * 30, 0.f, 39.f);
+                        peak = (uint32_t)SPA_CLAMPF(max * 30, 0.f, 39.f);
 
-                        /*fprintf(stdout, "channel %d: |%*s%*s| peak:%f\n",
-                                        c, peak+1, "*", 40 - peak, "", max);*/
+                        if (GUI_DISABLE) {
+                                fprintf(stdout, "channel %d: |", c);
+                                for (uint32_t i = 0; i <= peak+1; i++) fputs("\u2592", stdout);
+                                fprintf(stdout, "%*s| peak:%f\n", 40 - peak, "", max);
+                                //fprintf(stdout, "channel %d: |%*s%*s| peak:%f\n",
+                                //        c, peak+1, "\u2592", 40 - peak, "", max);
+
+                        }
                 }
         }
 
@@ -78,12 +77,16 @@ static void on_process(void *userdata)
                         fsize = ftell(file);
                         fclose(file);
                 }
-                //fprintf(stdout, "File: %s | %ld bytes", data->sfName, fsize);
+
+                if (GUI_DISABLE)
+                        fprintf(stdout, "File: %s | %ld bytes", data->sfName, fsize);
         }
 
 
         data->move = true;
-        //fflush(stdout);
+        if (GUI_DISABLE)
+                fflush(stdout);
+
         pw_stream_queue_buffer(data->stream, b);
 }
 
@@ -110,8 +113,10 @@ on_stream_param_changed(void *_data, uint32_t id, const struct spa_pod *param)
         /* call a helper function to parse the format for us. */
         spa_format_audio_raw_parse(param, &data->format.info.raw);
 
-        /*fprintf(stdout, "source rate:%d channels:%d\n",
-                        data->format.info.raw.rate, data->format.info.raw.channels);*/
+        if (GUI_DISABLE) {
+        fprintf(stdout, "source rate:%d channels:%d\n",
+                data->format.info.raw.rate, data->format.info.raw.channels);
+        }
 
 }
 
