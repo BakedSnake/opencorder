@@ -57,11 +57,8 @@ static void on_process(void *userdata)
 
                         if (GUI_DISABLE) {
                                 fprintf(stdout, "channel %d: |", c);
-                                for (uint32_t i = 0; i <= peak+1; i++) fputs("\u2592", stdout);
+                                for (size_t i = 0; i <= peak+1; i++) fputs("\u2592", stdout);
                                 fprintf(stdout, "%*s| peak:%f\n", 40 - peak, "", max);
-                                //fprintf(stdout, "channel %d: |%*s%*s| peak:%f\n",
-                                //        c, peak+1, "\u2592", 40 - peak, "", max);
-
                         }
                 }
         }
@@ -70,7 +67,6 @@ static void on_process(void *userdata)
         if (transport.armTrackBtn.isPressed && transport.recTrackBtn.isPressed) {
                 if (FILE_INITD && Data.sf != NULL) sf_write_float(Data.sf, samples, n_samples);
 
-                // Keep track of file size.
                 long fsize = 0;
                 FILE *file = fopen(data->sfName, "r");
                 if (file != NULL) {
@@ -80,7 +76,7 @@ static void on_process(void *userdata)
                 }
 
                 if (GUI_DISABLE)
-                        fprintf(stdout, "File: %s | %ld bytes", data->sfName, fsize);
+                        fprintf(stdout, "%-33sFile: %s | %ld bytes", "", data->sfName, fsize);
         }
 
 
@@ -115,8 +111,11 @@ on_stream_param_changed(void *_data, uint32_t id, const struct spa_pod *param)
         spa_format_audio_raw_parse(param, &data->format.info.raw);
 
         if (GUI_DISABLE) {
-        fprintf(stdout, "source rate:%d channels:%d\n",
-                data->format.info.raw.rate, data->format.info.raw.channels);
+                char separator[2] = "-";
+                size_t sepLength = 69;
+                fprintf(stdout, "[OpenCorder] >>> {Source Rate: %dHz Channels: %d}\n",
+                        data->format.info.raw.rate, data->format.info.raw.channels);
+                for (size_t i = 0; i < sepLength; i++) fputs(separator, stdout);
         }
 
 }
