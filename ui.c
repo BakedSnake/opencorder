@@ -4,49 +4,46 @@
 #include "pipe.h"
 #include "ui.h"
 
-Rectangle fileNameInput = (Rectangle){ 107, 23, 135, 18 };
-Rectangle sampleRateInput = (Rectangle){ 107, 41, 135, 18 };
-Rectangle channelsInput = (Rectangle){ 107, 59, 135, 18 };
-
-Rectangle newFileInput = (Rectangle){ 310, 235, 60, 30 };
-Rectangle saveFileInput = (Rectangle){ 310, 260, 60, 30 };
+Rectangle fileNameInput         = (Rectangle){ HEADER_INPUT_X, HEADER_FILE_Y,   HEADER_INPUT_WIDTH, HEADER_HEIGHT };
+Rectangle sampleRateInput       = (Rectangle){ HEADER_INPUT_X, HEADER_RATE_Y,   HEADER_INPUT_WIDTH, HEADER_HEIGHT };
+Rectangle channelsInput         = (Rectangle){ HEADER_INPUT_X, HEADER_MASTER_Y, HEADER_INPUT_WIDTH, HEADER_HEIGHT };
 
 void drawheader()
 {
-        DrawRectangle(23, 23, 85, 18, LIGHTGRAY);
-        DrawRectangleLines(23, 23, 85, 18, BLACK);
-        DrawText("File name", 25, 25, 14, BLACK);
-        DrawRectangle(23, 41, 85, 18, LIGHTGRAY);
-        DrawRectangleLines(23, 41, 85, 18, BLACK);
-        DrawText("Sample rate", 25, 43, 14, BLACK);
-        DrawRectangle(23, 59, 85, 18, LIGHTGRAY);
-        DrawRectangleLines(23, 59, 85, 18, BLACK);
-        DrawText("Master", 25, 62, 14, BLACK);
+        DrawRectangle(HEADER_X, HEADER_FILE_Y, HEADER_WIDTH, HEADER_HEIGHT, HEADER_BG_COLOR);
+        DrawRectangleLines(HEADER_X, HEADER_FILE_Y, HEADER_WIDTH, HEADER_HEIGHT, HEADER_FG_COLOR);
+        DrawText("File name", HEADER_TEXT_X, HEADER_FILE_TEXT_Y, HEADER_TEXT_SIZE, HEADER_FG_COLOR);
+        DrawRectangle(HEADER_X, HEADER_RATE_Y, HEADER_WIDTH, HEADER_HEIGHT, HEADER_BG_COLOR);
+        DrawRectangleLines(HEADER_X, HEADER_RATE_Y, HEADER_WIDTH, HEADER_HEIGHT, HEADER_FG_COLOR);
+        DrawText("Sample rate", HEADER_TEXT_X, HEADER_RATE_TEXT_Y, HEADER_TEXT_SIZE, HEADER_FG_COLOR);
+        DrawRectangle(HEADER_X, HEADER_MASTER_Y, HEADER_WIDTH, HEADER_HEIGHT, HEADER_BG_COLOR);
+        DrawRectangleLines(HEADER_X, HEADER_MASTER_Y, HEADER_WIDTH, HEADER_HEIGHT, HEADER_FG_COLOR);
+        DrawText("Master", HEADER_TEXT_X, HEADER_MASTER_TEXT_Y, HEADER_TEXT_SIZE, HEADER_FG_COLOR);
 
         // filename
-        DrawRectangle(107, 23, 135, 18, BLACK);
+        DrawRectangle(HEADER_INPUT_X, HEADER_FILE_Y, HEADER_INPUT_WIDTH, HEADER_HEIGHT, HEADER_FG_COLOR);
         DrawRectangleLines(
                         fileNameInput.x,
                         fileNameInput.y,
                         fileNameInput.width,
                         fileNameInput.height,
-                        BEIGE
+                        HEADER_BORDER_COLOR
         );
         // sample rate
-        DrawRectangle(107, 41, 135, 18, BLACK);
+        DrawRectangle(HEADER_INPUT_X, HEADER_RATE_Y, HEADER_INPUT_WIDTH, HEADER_HEIGHT, HEADER_FG_COLOR);
         DrawRectangleLines(sampleRateInput.x,
                         sampleRateInput.y,
                         sampleRateInput.width,
                         sampleRateInput.height,
-                        BEIGE
+                        HEADER_BORDER_COLOR
         );
         // channels
-        DrawRectangle(107, 59, 135, 18, BLACK);
+        DrawRectangle(HEADER_INPUT_X, HEADER_MASTER_Y, HEADER_INPUT_WIDTH, HEADER_HEIGHT, HEADER_FG_COLOR);
         DrawRectangleLines(channelsInput.x,
                         channelsInput.y,
                         channelsInput.width,
                         channelsInput.height,
-                        BEIGE
+                        HEADER_BORDER_COLOR
         );
 }
 
@@ -54,42 +51,42 @@ void drawInfo(struct data *data, SF_INFO sfinfo)
 {
         drawheader();
         char* filename = fName;
-        DrawText(filename, 115, 25, 14, BEIGE);
+        DrawText(filename, INFO_TEXT_X, FILE_NAME_Y, INFO_TEXT_SIZE, BEIGE);
 
-        char rate[9];
+        char rate[RATE_TEXT_LENGTH];
         int sp = samplerate;
-        snprintf(rate, 9, "%d Hz", sp);
-        DrawText(rate, 115, 43, 14, BEIGE);
+        snprintf(rate, RATE_TEXT_LENGTH, "%d Hz", sp);
+        DrawText(rate, INFO_TEXT_X, RATE_TEXT_Y, INFO_TEXT_SIZE, BEIGE);
 
-        char master[7];
+        char master[MASTER_TEXT_LENGTH];
         int chans = channels;
         if (chans == 2)
-                snprintf(master, 7, "%s", "Stereo");
+                snprintf(master, MASTER_TEXT_LENGTH, "%s", "Stereo");
 
         if (chans == 1)
-                snprintf(master, 7, "%s", "Mono  ");
+                snprintf(master, MASTER_TEXT_LENGTH, "%s", "Mono  ");
 
-        DrawText(master, 115, 62, 14, BEIGE);
+        DrawText(master, INFO_TEXT_X, MASTER_TEXT_Y, INFO_TEXT_SIZE, BEIGE);
 }
 
 void drawVolumeMeters(Texture2D faderTex)
 {
-        DrawTexture(faderTex, 500, 20, WHITE);
-        DrawTexture(faderTex, 550, 20, WHITE);
+        DrawTexture(faderTex, LEFT_FADER_X, FADER_Y, WHITE);
+        DrawTexture(faderTex, RIGHT_FADER_X, FADER_Y, WHITE);
 
-        float leftFull = SAMPLE_LEFT * 280;
-        float rightFull = SAMPLE_RIGHT * 280;
+        float leftFull = SAMPLE_LEFT * FADER_HEIGHT;
+        float rightFull = SAMPLE_RIGHT * FADER_HEIGHT;
 
-        for (size_t j = 0; j < (280); ++j) {
+        for (size_t j = 0; j < FADER_HEIGHT; ++j) {
                 if (j < leftFull)
-                        DrawRectangle(WIDTH-100, 299-j, 30, 1, GREEN);
+                        DrawRectangle(LEFT_METER_X, FADER_HEIGHT+METER_PADDING-j, FADER_WIDTH, METER_THICKNESS, METER_COLOR);
 
                 if (j < rightFull)
-                        DrawRectangle(WIDTH-50, 299-j, 30, 1, GREEN);
+                        DrawRectangle(RIGHT_METER_X, FADER_HEIGHT+METER_PADDING-j, FADER_WIDTH, METER_THICKNESS, METER_COLOR);
         }
 
-        DrawRectangleLines(550, 20, 30, 280, BLACK);
-        DrawRectangleLines(500, 20, 30, 280, BLACK);
+        DrawRectangleLines(RIGHT_FADER_X, FADER_Y, FADER_WIDTH, FADER_HEIGHT, FADER_LINE_COLOR);
+        DrawRectangleLines(LEFT_FADER_X, FADER_Y, FADER_WIDTH, FADER_HEIGHT, FADER_LINE_COLOR);
 }
 
 void drawVolumeValues()
@@ -100,8 +97,8 @@ void drawVolumeValues()
         snprintf(left, sizeof(SAMPLE_LEFT)+1, "%.2f", SAMPLE_LEFT);
         snprintf(right, sizeof(SAMPLE_RIGHT)+1, "%.2f", SAMPLE_RIGHT);
 
-        DrawText(left, 505, 305, 14, RED);
-        DrawText(right, 555, 305, 14, RED);
+        DrawText(left, LEFT_VOLUME_VALUE_X, LEFT_VOLUME_VALUE_Y, LEFT_VOLUME_VALUE_S, LEFT_VOLUME_VALUE_C);
+        DrawText(right, RIGHT_VOLUME_VALUE_X, RIGHT_VOLUME_VALUE_Y, RIGHT_VOLUME_VALUE_S, RIGHT_VOLUME_VALUE_C);
 
         free(left);
         free(right);
@@ -160,11 +157,11 @@ void drawControls()
         else if (transport.saveFileBtn.isHovered)
                 currSaveFileTexture = transport.saveFileBtn.hoverTexture;
 
-        DrawTextureEx(currNewFileTexture,       (Vector2){310, 235}, .0f, .75f, WHITE);
-        DrawTextureEx(currSaveFileTexture,      (Vector2){310, 260}, .0f, .75f, WHITE);
-        DrawTextureEx(currStopTrackTexture,     (Vector2){35 , 235}, .0f, .75f, WHITE);
-        DrawTextureEx(currArmTrackTexture,      (Vector2){82 , 235}, .0f, .75f, WHITE);
-        DrawTextureEx(currRecTrackTexture,      (Vector2){129, 235}, .0f, .75f, WHITE);
-        DrawTextureEx(currPauseTrackTexture,    (Vector2){176, 235}, .0f, .75f, WHITE);
+        DrawTextureEx(currNewFileTexture,       (Vector2){NEW_BTN_X,    HIGH_BTN_Y}, .0f, BTN_SCALE, WHITE);
+        DrawTextureEx(currSaveFileTexture,      (Vector2){SAVE_BTN_X,   LOW_BTN_Y }, .0f, BTN_SCALE, WHITE);
+        DrawTextureEx(currStopTrackTexture,     (Vector2){STOP_BTN_X ,  HIGH_BTN_Y}, .0f, BTN_SCALE, WHITE);
+        DrawTextureEx(currArmTrackTexture,      (Vector2){ARM_BTN_X ,   HIGH_BTN_Y}, .0f, BTN_SCALE, WHITE);
+        DrawTextureEx(currRecTrackTexture,      (Vector2){REC_BTN_X,    HIGH_BTN_Y}, .0f, BTN_SCALE, WHITE);
+        DrawTextureEx(currPauseTrackTexture,    (Vector2){PAUSE_BTN_X,  HIGH_BTN_Y}, .0f, BTN_SCALE, WHITE);
 }
 
