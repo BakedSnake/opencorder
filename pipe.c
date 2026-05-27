@@ -65,7 +65,7 @@ static void on_process(void *userdata)
 
         // Write sample data (total nr samples) to file.
         if (transport.armTrackBtn.isPressed && transport.recTrackBtn.isPressed) {
-                if (FILE_INITD && Data.sf != NULL) sf_write_float(Data.sf, samples, n_samples);
+                if (FILE_INITD && DATA.sf != NULL) sf_write_float(DATA.sf, samples, n_samples);
 
                 long fsize = 0;
                 FILE *file = fopen(data->sfName, "r");

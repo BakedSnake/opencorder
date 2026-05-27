@@ -11,7 +11,7 @@ typedef struct data {
         char *sfName;
 } data;
 
-extern data Data;
+extern data DATA;
 
 typedef struct pipeData {
         struct data dat;

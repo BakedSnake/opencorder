@@ -10,6 +10,8 @@
 #define SAMPLING_RATE_22K       22050
 #define SAMPLING_RATE_11K       11025
 
+extern char* PATH;
+
 extern float SAMPLE_LEFT;
 extern float SAMPLE_RIGHT;
 extern float VOL_RATIO;
@@ -21,12 +23,12 @@ extern bool MOUSE_ON_INPUT;
 extern char SEPARATOR[2];
 extern size_t CLILEN;
 
-extern char fName[MAX_FILE_CHAR+1];
-extern size_t charCount;
-extern int samplerate;
-extern int channels;
+extern char FNAME[MAX_FILE_CHAR+1];
+extern size_t CHAR_COUNT;
+extern int SAMPLE_RATE;
+extern int CHANNELS;
 
-static char version[6] = "0.0.8";
+static char VERSION[6] = "0.0.8";
 
 static struct option options[] = {
   {"help",              no_argument,            0, 'h'},

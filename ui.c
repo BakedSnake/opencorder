@@ -50,16 +50,16 @@ void drawheader()
 void drawInfo(struct data *data, SF_INFO sfinfo)
 {
         drawheader();
-        char* filename = fName;
+        char* filename = FNAME;
         DrawText(filename, INFO_TEXT_X, FILE_NAME_Y, INFO_TEXT_SIZE, BEIGE);
 
         char rate[RATE_TEXT_LENGTH];
-        int sp = samplerate;
+        int sp = SAMPLE_RATE;
         snprintf(rate, RATE_TEXT_LENGTH, "%d Hz", sp);
         DrawText(rate, INFO_TEXT_X, RATE_TEXT_Y, INFO_TEXT_SIZE, BEIGE);
 
         char master[MASTER_TEXT_LENGTH];
-        int chans = channels;
+        int chans = CHANNELS;
         if (chans == 2)
                 snprintf(master, MASTER_TEXT_LENGTH, "%s", "Stereo");
 

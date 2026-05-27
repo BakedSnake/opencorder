@@ -7,14 +7,11 @@
 #include "pipe.h"
 #include "ui.h"
 
-int rc;
+data DATA                       = { 0 };
+SF_INFO SFINFO                  = { 0 };
+
 float SAMPLE_LEFT;
 float SAMPLE_RIGHT;
-char* PATH;
-
-pthread_t guiThread;
-pthread_t pipeThread;
-Transport transport;
 
 float VOL_RATIO                 = .1f;
 bool GUI_DISABLE                = false;
@@ -24,16 +21,18 @@ char* SAVE_PATH                 = "/extra/Music/";
 char SEPARATOR[2]               = "-";
 size_t CLILEN                   = 69;
 
-data Data                       = { 0 };
-SF_INFO sfinfo                  = { 0 };
+size_t CHAR_COUNT               = 0;
+int SAMPLE_RATE                 = SAMPLING_RATE_48K;
+int CHANNELS                    = STEREO;
+char* RATESTR                   = NULL;
+char* STREAM_TARGET             = NULL;
+char* PATH                      = NULL;
+char FNAME[MAX_FILE_CHAR+1]     = "\0";
 
-size_t charCount                = 0;
-int samplerate                  = SAMPLING_RATE_48K;
-int channels                    = STEREO;
-char* rateStr                   = NULL;
-char* streamTarget              = NULL;
-char* path                      = NULL;
-char fName[MAX_FILE_CHAR+1]     = "\0";
+int rc;
+pthread_t guiThread;
+pthread_t pipeThread;
+Transport transport;
 
 void updateFileName()
 {
@@ -41,32 +40,32 @@ void updateFileName()
         int key = GetCharPressed();
 
         while (key > 0) {
-                if ((key >= 32) && (key <= 125) && (charCount < MAX_FILE_CHAR)) {
-                        fName[charCount] = (char)key;
-                        fName[charCount+1] = '\0';
-                        charCount++;
+                if ((key >= 32) && (key <= 125) && (CHAR_COUNT < MAX_FILE_CHAR)) {
+                        FNAME[CHAR_COUNT] = (char)key;
+                        FNAME[CHAR_COUNT+1] = '\0';
+                        CHAR_COUNT++;
                 }
 
                 key = GetCharPressed();
         }
 
         if (IsKeyPressed(KEY_BACKSPACE)) {
-                charCount--;
-                if (charCount < 0) charCount = 0;
-                fName[charCount] = '\0';
+                CHAR_COUNT--;
+                if (CHAR_COUNT < 0) CHAR_COUNT = 0;
+                FNAME[CHAR_COUNT] = '\0';
         }
 }
 
 void sndFileInit(char* rateStr)
 {
         if (!FILE_INITD) {
-                Data.sfName = fName;
+                DATA.sfName = FNAME;
 
-                sfinfo.samplerate = samplerate;
-                sfinfo.channels = channels;
-                sfinfo.format = SF_FORMAT_WAV | SF_FORMAT_PCM_32;
-                Data.sf = sf_open(Data.sfName, SFM_WRITE, &sfinfo);
-                if (!Data.sf) {
+                SFINFO.samplerate = SAMPLE_RATE;
+                SFINFO.channels = CHANNELS;
+                SFINFO.format = SF_FORMAT_WAV | SF_FORMAT_PCM_32;
+                DATA.sf = sf_open(DATA.sfName, SFM_WRITE, &SFINFO);
+                if (!DATA.sf) {
                     fprintf(stderr, "Error opening file: %s\n", sf_strerror(NULL));
                     return;
                 }
@@ -120,31 +119,31 @@ int argHandle(int argc, char* argv[])
                         case 'v':
                                 printf("[OpenCorder] %56s\n", "MIT 2026");
                                 for (size_t i = 0; i < 69; ++i) fputs("-", stdout);
-                                printf("\nVersion: %60s\n", version);
+                                printf("\nVersion: %60s\n", VERSION);
                                 return 1;
                         case 'o':
-                                path = optarg;
+                                PATH = optarg;
                                 transport.armTrackBtn.isPressed = true;
                                 transport.recTrackBtn.isPressed = true;
-                                if (path) strncpy(fName, path, MAX_FILE_CHAR);
-                                else strncpy(fName, "recording.wav", MAX_FILE_CHAR);
-                                fName[MAX_FILE_CHAR] = '\0';
-                                sndFileInit(rateStr);
+                                if (PATH) strncpy(FNAME, PATH, MAX_FILE_CHAR);
+                                else strncpy(FNAME, "recording.wav", MAX_FILE_CHAR);
+                                FNAME[MAX_FILE_CHAR] = '\0';
+                                sndFileInit(RATESTR);
                                 break;
                         case 'r':
-                                rateStr = optarg;
-                                if (atoi(rateStr) != 0)
-                                        samplerate = atoi(rateStr);
+                                RATESTR = optarg;
+                                if (atoi(RATESTR) != 0)
+                                        SAMPLE_RATE = atoi(RATESTR);
                                 break;
                         case 't':
-                                streamTarget = optarg;
+                                STREAM_TARGET = optarg;
                                 break;
                         case 'n':
                                 GUI_DISABLE = true;
                                 break;
                         case 'c':
                                 if (atoi(optarg) != 0)
-                                        channels = atoi(optarg);
+                                        CHANNELS = atoi(optarg);
                                 break;
                         case '?':
                                 default:
@@ -162,13 +161,13 @@ int main(int argc, char *argv[])
 
         pw_init(&argc, &argv);
         pipeData *pd = malloc(sizeof(pipeData));
-        pd->dat = Data;
-        pd->target = streamTarget;
+        pd->dat = DATA;
+        pd->target = STREAM_TARGET;
         pd->argc = argc;
 
         if (GUI_DISABLE) {
                 piper(pd);
-                if (Data.sf) sf_close(Data.sf);
+                if (DATA.sf) sf_close(DATA.sf);
                 pw_deinit();
                 return 0;
         } else {
@@ -250,18 +249,18 @@ int main(int argc, char *argv[])
                 if (sampleRateIsHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                         // toggle sample rate for now
                         // sfinfo.samplerate = samplerate;
-                        switch (samplerate) {
+                        switch (SAMPLE_RATE) {
                                 case SAMPLING_RATE_48K:
-                                samplerate = SAMPLING_RATE_44K;
+                                SAMPLE_RATE = SAMPLING_RATE_44K;
                                 break;
                                 case SAMPLING_RATE_44K:
-                                samplerate = SAMPLING_RATE_22K;
+                                SAMPLE_RATE = SAMPLING_RATE_22K;
                                 break;
                                 case SAMPLING_RATE_22K:
-                                samplerate = SAMPLING_RATE_11K;
+                                SAMPLE_RATE = SAMPLING_RATE_11K;
                                 break;
                                 default:
-                                samplerate = SAMPLING_RATE_48K;
+                                SAMPLE_RATE = SAMPLING_RATE_48K;
                                 break;
                         }
                 }
@@ -271,12 +270,12 @@ int main(int argc, char *argv[])
 
                 if (channelsIsHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                         // sfinfo.channels = samplerate;
-                        switch (channels) {
+                        switch (CHANNELS) {
                                 case STEREO:
-                                channels = MONO;
+                                CHANNELS = MONO;
                                 break;
                                 default:
-                                channels = STEREO;
+                                CHANNELS = STEREO;
                                 break;
                         }
                 }
@@ -287,7 +286,7 @@ int main(int argc, char *argv[])
                                 transport.armTrackBtn.isPressed = false;
                         } else {
                                 transport.armTrackBtn.isPressed = true;
-                                sndFileInit(rateStr);
+                                sndFileInit(RATESTR);
                         }
                 }
 
@@ -336,11 +335,11 @@ int main(int argc, char *argv[])
                 if (transport.newFileBtn.isHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                         transport.newFileBtn.isPressed = true;
                         FILE_INITD = false;
-                        memset(fName, 0, sizeof(fName) - 1);
-                        charCount = 0;
-                        sf_close(Data.sf);
-                        samplerate = SAMPLING_RATE_48K;
-                        channels = STEREO;
+                        memset(FNAME, 0, sizeof(FNAME) - 1);
+                        CHAR_COUNT = 0;
+                        sf_close(DATA.sf);
+                        SAMPLE_RATE = SAMPLING_RATE_48K;
+                        CHANNELS = STEREO;
                 }
 
                 if (transport.saveFileBtn.isHovered)
@@ -355,7 +354,7 @@ int main(int argc, char *argv[])
                 DrawTexture(backgroundTexture, 0, 0, WHITE);
                 DrawTexture(screenTexture, SCREEN_X, SCREEN_Y, WHITE);
                 DrawRectangleLines(SCREEN_X, SCREEN_Y, SCREEN_W, SCREEN_H, SCREEN_BORDER_C);
-                drawInfo(&Data, sfinfo);
+                drawInfo(&DATA, SFINFO);
                 drawVolumeMeters(faderTexture);
                 drawVolumeValues();
                 DrawTexture(transportTexture, TRANSPORT_X, TRANSPORT_Y, WHITE);
@@ -366,8 +365,8 @@ int main(int argc, char *argv[])
 
         pthread_detach(guiThread);
         pthread_join(pipeThread, NULL);
-        pw_stream_destroy(Data.stream);
-        pw_main_loop_destroy(Data.loop);
+        pw_stream_destroy(DATA.stream);
+        pw_main_loop_destroy(DATA.loop);
         pw_deinit();
         UnloadTexture(stopTrack);
         UnloadTexture(armTrack);
