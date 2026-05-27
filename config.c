@@ -44,7 +44,11 @@ char* parseConfigLine(char buf[256], char *target)
                 size_t count = 0;
 
                 while (token != NULL) {
-                        if (count > 0) result = token;
+                        if (count > 0) {
+                                result = token;
+                                break;
+                        }
+
                         token = strtok(NULL, " = ");
                         count++;
                 }
