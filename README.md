@@ -26,7 +26,15 @@ corder
 
 CLI:
 ```bash
-corder --nogui --rate 48000 --output /path/to/file.wav
+corder --nogui --rate 48000 --channels 2 --output /path/to/file.wav
+```
+
+```bash
+corder --version
+```
+
+```bash
+corder --help
 ```
 
 ## LICENSE
