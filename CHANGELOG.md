@@ -1,7 +1,7 @@
 # Change Log
 
 ## 0.0.9
-- [ ] Config file support.
+- [x] Config file support.
 - [x] Implement `--version` flag command.
 - [x] Implement `--help` flag command.
 - [x] Support *short* flags.

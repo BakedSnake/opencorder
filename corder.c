@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <pipewire/pipewire.h>
+#include "config.h"
 #include "corder.h"
 #include "pipe.h"
 #include "ui.h"
@@ -17,7 +18,6 @@ float VOL_RATIO                 = .1f;
 bool GUI_DISABLE                = false;
 bool FILE_INITD                 = false;
 bool MOUSE_ON_INPUT             = false;
-char* SAVE_PATH                 = "/extra/Music/";
 char SEPARATOR[2]               = "-";
 size_t CLILEN                   = 69;
 
@@ -26,6 +26,7 @@ int SAMPLE_RATE                 = SAMPLING_RATE_48K;
 int CHANNELS                    = STEREO;
 char* RATESTR                   = NULL;
 char* STREAM_TARGET             = NULL;
+char* SAVE_PATH                 = NULL;
 char* PATH                      = NULL;
 char FNAME[MAX_FILE_CHAR+1]     = "\0";
 
@@ -156,6 +157,7 @@ int argHandle(int argc, char* argv[])
 
 int main(int argc, char *argv[])
 {
+        getConfig();
         int e = argHandle(argc, argv);
         if (e != 0) return 0;
 

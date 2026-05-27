@@ -25,8 +25,6 @@ extern size_t CLILEN;
 
 extern char FNAME[MAX_FILE_CHAR+1];
 extern size_t CHAR_COUNT;
-extern int SAMPLE_RATE;
-extern int CHANNELS;
 
 static char VERSION[6] = "0.0.8";
 
