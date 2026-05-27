@@ -15,6 +15,8 @@ void getConfig()
 
         rewind(fp);
         while (fgets(buf, sizeof(buf), fp) != NULL) {
+                if(buf[0] == '[') continue;
+
                 char* dir = parseConfigLine(buf, "Directory");
                 if (dir != NULL) SAVE_PATH = dir;
 
@@ -25,6 +27,10 @@ void getConfig()
                         if (atoi(RATESTR) != 0)
                                 SAMPLE_RATE = atoi(RATESTR);
                 }
+
+                char* chans = parseConfigLine(buf, "Channels");
+                if (chans != NULL)
+                        if (atoi(chans) != 0) CHANNELS = atoi(chans);
         }
 
         fclose(fp);

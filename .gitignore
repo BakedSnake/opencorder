@@ -1,5 +1,6 @@
 /out-recording.wav
 /recording.wav
+/config.o
 /corder.o
 /pipe.o
 /ui.o
