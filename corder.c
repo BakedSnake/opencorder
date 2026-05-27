@@ -21,6 +21,8 @@ bool GUI_DISABLE                = false;
 bool FILE_INITD                 = false;
 bool MOUSE_ON_INPUT             = false;
 char* SAVE_PATH                 = "/extra/Music/";
+char SEPARATOR[2]               = "-";
+size_t CLILEN                   = 69;
 
 data Data                       = { 0 };
 SF_INFO sfinfo                  = { 0 };
@@ -100,17 +102,26 @@ void copyFile(char* targetPath)
         fclose(target);
 }
 
-void argHandle(int argc, char* argv[])
+int argHandle(int argc, char* argv[])
 {
         int opt;
         while ((opt = getopt_long(argc, argv, "hvfrotnc:", options, NULL)) != -1) {
                 switch (opt) {
                         case 'h':
-                                printf("Usage: ...\n");
-                                return;
+                                printf("[OpenCorder] %56s\n", "USAGE:");
+                                for (size_t i = 0; i < 69; ++i) fputs("-", stdout);
+                                printf("\n-n, %21s, %42s\n",    "--nogui",      "No GUI, CLI only.");
+                                printf("-r, %21s, %42s\n",      "--rate",       "Specify sampling rate.");
+                                printf("-c, %21s, %42s\n",      "--channels",   "Specify number of channels.");
+                                printf("-o, %21s, %42s\n",      "--output",     "Output file path.");
+                                printf("-v, %21s, %42s\n",      "--version",    "Show version.");
+                                printf("-h, %21s, %42s\n",      "--help",       "Show help.");
+                                return 1;
                         case 'v':
-                                printf("Version: %s\n", version);
-                                return;
+                                printf("[OpenCorder] %56s\n", "MIT 2026");
+                                for (size_t i = 0; i < 69; ++i) fputs("-", stdout);
+                                printf("\nVersion: %60s\n", version);
+                                return 1;
                         case 'o':
                                 path = optarg;
                                 transport.armTrackBtn.isPressed = true;
@@ -122,6 +133,8 @@ void argHandle(int argc, char* argv[])
                                 break;
                         case 'r':
                                 rateStr = optarg;
+                                if (atoi(rateStr) != 0)
+                                        samplerate = atoi(rateStr);
                                 break;
                         case 't':
                                 streamTarget = optarg;
@@ -139,11 +152,14 @@ void argHandle(int argc, char* argv[])
                }
         }
 
+        return 0;
 }
 
 int main(int argc, char *argv[])
 {
-        argHandle(argc, argv);
+        int e = argHandle(argc, argv);
+        if (e != 0) return 0;
+
         pw_init(&argc, &argv);
         pipeData *pd = malloc(sizeof(pipeData));
         pd->dat = Data;

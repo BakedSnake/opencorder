@@ -111,13 +111,10 @@ on_stream_param_changed(void *_data, uint32_t id, const struct spa_pod *param)
         spa_format_audio_raw_parse(param, &data->format.info.raw);
 
         if (GUI_DISABLE) {
-                char separator[2] = "-";
-                size_t sepLength = 69;
-                fprintf(stdout, "[OpenCorder] >>> {Source Rate: %dHz Channels: %d}\n",
-                        data->format.info.raw.rate, data->format.info.raw.channels);
-                for (size_t i = 0; i < sepLength; i++) fputs(separator, stdout);
+                fprintf(stdout, "[OpenCorder]%23s{Source Rate: %dHz Channels: %d}\n",
+                        "", data->format.info.raw.rate, data->format.info.raw.channels);
+                for (size_t i = 0; i < CLILEN; ++i) fputs(SEPARATOR, stdout);
         }
-
 }
 
 static const struct pw_stream_events stream_events = {

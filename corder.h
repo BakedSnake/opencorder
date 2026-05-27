@@ -18,6 +18,9 @@ extern bool GUI_DISABLE;
 extern bool FILE_INITD;
 extern bool MOUSE_ON_INPUT;
 
+extern char SEPARATOR[2];
+extern size_t CLILEN;
+
 extern char fName[MAX_FILE_CHAR+1];
 extern size_t charCount;
 extern int samplerate;
