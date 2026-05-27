@@ -23,7 +23,7 @@ extern size_t charCount;
 extern int samplerate;
 extern int channels;
 
-static char version[6] = "0.0.7";
+static char version[6] = "0.0.8";
 
 static struct option options[] = {
   {"help",              no_argument,            0, 'h'},
