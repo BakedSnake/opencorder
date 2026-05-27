@@ -2,9 +2,11 @@
 
 ## 0.0.9
 - [ ] Config file support.
-- [ ] Implement `--version` command.
-- [ ] Implement `--help` command.
+- [x] Implement `--version` flag command.
+- [x] Implement `--help` flag command.
 - [ ] Support *short* flags.
+- [x] Fix `--rate` cli flag.
+- [x] Better CLI width & format.
 
 ## 0.0.8
 - [x] UI refactoring.
