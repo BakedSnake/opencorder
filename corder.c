@@ -104,7 +104,7 @@ void copyFile(char* targetPath)
 int argHandle(int argc, char* argv[])
 {
         int opt;
-        while ((opt = getopt_long(argc, argv, "hvfrotnc:", options, NULL)) != -1) {
+        while ((opt = getopt_long(argc, argv, "hvf:r:o:t:nc:", options, NULL)) != -1) {
                 switch (opt) {
                         case 'h':
                                 printf("[OpenCorder] %56s\n", "USAGE:");

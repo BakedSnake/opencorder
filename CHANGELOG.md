@@ -4,7 +4,7 @@
 - [ ] Config file support.
 - [x] Implement `--version` flag command.
 - [x] Implement `--help` flag command.
-- [ ] Support *short* flags.
+- [x] Support *short* flags.
 - [x] Fix `--rate` cli flag.
 - [x] Better CLI width & format.
 

@@ -26,7 +26,8 @@ corder
 
 CLI:
 ```bash
-corder --nogui --rate 48000 --channels 2 --output /path/to/file.wav
+corder --nogui --rate 48000 --channels 2 --output /path/to/file.wav # 48K sampling rate stereo
+corder -n -r 44100 -c 1 -o /path/to/file.wav                        # 44100 Hz sampling rate mono
 ```
 
 ```bash
