@@ -1,5 +1,13 @@
 # Change Log
 
+## 0.0.10
+- [ ] UI update.
+  * [ ] New fader / volume section.
+  * [ ] New Transport.
+  * [ ] New Info / Control "*screen*"
+- [ ] Save files to a different directory ( GUI mode ).
+- [ ] Fader volume display fix.
+
 ## 0.0.9
 - [x] Config file support.
 - [x] Implement `--version` flag command.

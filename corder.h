@@ -26,7 +26,7 @@ extern size_t CLILEN;
 extern char FNAME[MAX_FILE_CHAR+1];
 extern size_t CHAR_COUNT;
 
-static char VERSION[6] = "0.0.8";
+static char VERSION[6] = "0.0.9";
 
 static struct option options[] = {
   {"help",              no_argument,            0, 'h'},
