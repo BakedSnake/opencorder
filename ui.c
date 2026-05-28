@@ -166,3 +166,24 @@ void drawControls()
         DrawTextureEx(currPauseTrackTexture,    (Vector2){PAUSE_BTN_X,  HIGH_BTN_Y}, .0f, BTN_SCALE, WHITE);
 }
 
+void updateFileName()
+{
+        SetMouseCursor(MOUSE_CURSOR_IBEAM);
+        int key = GetCharPressed();
+
+        while (key > 0) {
+                if ((key >= 32) && (key <= 125) && (CHAR_COUNT < MAX_FILE_CHAR)) {
+                        FNAME[CHAR_COUNT] = (char)key;
+                        FNAME[CHAR_COUNT+1] = '\0';
+                        CHAR_COUNT++;
+                }
+
+                key = GetCharPressed();
+        }
+
+        if (IsKeyPressed(KEY_BACKSPACE)) {
+                CHAR_COUNT--;
+                if (CHAR_COUNT < 0) CHAR_COUNT = 0;
+                FNAME[CHAR_COUNT] = '\0';
+        }
+}

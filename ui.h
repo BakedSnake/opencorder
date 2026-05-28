@@ -119,3 +119,5 @@ void drawVolumeValues();
 TextureButton newButton(Rectangle bounds, Texture2D texture, Texture2D pressedTexture, Texture2D hoverTexture, Color tint);
 
 void drawControls();
+
+void updateFileName();
