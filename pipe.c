@@ -50,8 +50,8 @@ static void on_process(void *userdata)
                                 max = fmaxf(max, fabsf(samples[n]));
                         }
 
-                        SAMPLE_LEFT = c == 0 ? samples[0] / VOL_RATIO : SAMPLE_LEFT;
-                        SAMPLE_RIGHT = c == 1 ? samples[1] / VOL_RATIO : SAMPLE_RIGHT;
+                        SAMPLE_LEFT = c == 0 ? max / VOL_RATIO : SAMPLE_LEFT;
+                        SAMPLE_RIGHT = c == 1 ? max / VOL_RATIO : SAMPLE_RIGHT;
 
                         peak = (uint32_t)SPA_CLAMPF(max * 30, 0.f, 39.f);
 

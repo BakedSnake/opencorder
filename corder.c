@@ -14,7 +14,7 @@ SF_INFO SFINFO                  = { 0 };
 float SAMPLE_LEFT;
 float SAMPLE_RIGHT;
 
-float VOL_RATIO                 = .1f;
+float VOL_RATIO                 = 1.f;
 bool GUI_DISABLE                = false;
 bool FILE_INITD                 = false;
 bool MOUSE_ON_INPUT             = false;
