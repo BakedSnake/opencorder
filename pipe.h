@@ -1,6 +1,8 @@
 #include <sndfile.h>
 #include <spa/param/audio/format-utils.h>
 
+extern SF_INFO SFINFO;
+
 typedef struct data {
         struct pw_main_loop *loop;
         struct pw_stream *stream;

@@ -1,6 +1,7 @@
 #include <getopt.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <time.h>
 
 #define MONO                    1
 #define STEREO                  2
@@ -11,6 +12,9 @@
 #define SAMPLING_RATE_11K       11025
 
 extern char* PATH;
+extern char TIME[64];
+extern clock_t CLOCK;
+extern clock_t CLOCK_P;
 
 extern float SAMPLE_LEFT;
 extern float SAMPLE_RIGHT;

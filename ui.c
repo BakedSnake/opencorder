@@ -1,5 +1,7 @@
+#include <raylib.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "config.h"
 #include "corder.h"
 #include "pipe.h"
@@ -70,8 +72,30 @@ void drawInfo(struct data *data, SF_INFO sfinfo)
         DrawText(master, INFO_TEXT_X, MASTER_TEXT_Y, INFO_TEXT_SIZE, BEIGE);
 }
 
+void drawController()
+{
+#define CONTROLLER_W 400
+#define CONTROLLER_H HEIGHT-TRANSPORT_H
+#define CONTROLLER_X 0
+#define CONTROLLER_Y 0
+        DrawRectangle(CONTROLLER_X, CONTROLLER_Y, CONTROLLER_W, CONTROLLER_H, BLACK);
+        drawInfo(&DATA, SFINFO);
+}
+
+void drawVolumeSection()
+{
+        DrawRectangle(WIDTH-200, 0, 200, HEIGHT, BLACK);
+        DrawLineEx((Vector2){WIDTH-200, 0}, (Vector2){WIDTH-200, HEIGHT}, 2, RAYWHITE);
+}
+
+void drawVuMeters()
+{
+        drawVolumeSection();
+}
+
 void drawVolumeMeters(Texture2D faderTex)
 {
+        drawVolumeSection();
         DrawTexture(faderTex, LEFT_FADER_X, FADER_Y, WHITE);
         DrawTexture(faderTex, RIGHT_FADER_X, FADER_Y, WHITE);
 
@@ -120,7 +144,7 @@ TextureButton newButton(Rectangle bounds, Texture2D texture, Texture2D pressedTe
         return new;
 }
 
-void drawControls()
+void drawTransportControls()
 {
         Texture2D currArmTrackTexture = transport.armTrackBtn.texture;
         if (transport.armTrackBtn.isPressed)
@@ -164,6 +188,42 @@ void drawControls()
         DrawTextureEx(currArmTrackTexture,      (Vector2){ARM_BTN_X ,   HIGH_BTN_Y}, .0f, BTN_SCALE, WHITE);
         DrawTextureEx(currRecTrackTexture,      (Vector2){REC_BTN_X,    HIGH_BTN_Y}, .0f, BTN_SCALE, WHITE);
         DrawTextureEx(currPauseTrackTexture,    (Vector2){PAUSE_BTN_X,  HIGH_BTN_Y}, .0f, BTN_SCALE, WHITE);
+}
+
+void drawTimer()
+{
+#define TIMER_W 120
+#define TIMER_H 45
+#define TIMER_X 205
+#define TIMER_Y HEIGHT - 60
+        DrawRectangle(TIMER_X, TIMER_Y, TIMER_W, TIMER_H, BEIGE);
+        if (transport.recTrackBtn.isPressed) {
+                double diff = difftime(time(NULL), CLOCK);
+                int totalSeconds = (int)diff;
+                int minutes = totalSeconds / 60;
+                int seconds = totalSeconds % 60;
+                snprintf(TIME, 64, "%02d:%02d", minutes, seconds);
+                Vector2 dims = MeasureTextEx(GetFontDefault(), TIME, 36, 0);
+                int len = MeasureText(TIME, 36);
+                DrawText(TIME, (TIMER_X-2)+(TIMER_W/2.-(len/2.)), (TIMER_Y+2)+(TIMER_H-2)/2.-dims.y/2, 36, BLACK);
+        } else if (transport.pauseTrackBtn.isPressed) {
+                int len = MeasureText(TIME, 36);
+                Vector2 dims = MeasureTextEx(GetFontDefault(), TIME, 36, 0);
+                DrawText(TIME, (TIMER_X-2)+(TIMER_W/2.-(len/2.)), (TIMER_Y+2)+(TIMER_H-2)/2.-dims.y/2, 36, BLACK);
+        } else {
+                char *time = "00:00";
+                int len = MeasureText(time, 36);
+                Vector2 dims = MeasureTextEx(GetFontDefault(), time, 36, 0);
+                DrawText(time, (TIMER_X-2)+(TIMER_W/2.-(len/2.)), (TIMER_Y+2)+(TIMER_H-2)/2.-dims.y/2, 36, BLACK);
+        }
+}
+
+void drawTransport()
+{
+        DrawRectangle(TRANSPORT_X, TRANSPORT_Y, TRANSPORT_W, TRANSPORT_H, BLACK);
+        DrawLineEx((Vector2){TRANSPORT_X, TRANSPORT_Y}, (Vector2){400, TRANSPORT_Y}, 2, RAYWHITE);
+        drawTransportControls();
+        drawTimer();
 }
 
 void updateFileName()

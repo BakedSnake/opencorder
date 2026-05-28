@@ -8,27 +8,30 @@
 #include "pipe.h"
 #include "ui.h"
 
-data DATA                       = { 0 };
+data    DATA                    = { 0 };
 SF_INFO SFINFO                  = { 0 };
 
-float SAMPLE_LEFT;
-float SAMPLE_RIGHT;
+float   SAMPLE_LEFT;
+float   SAMPLE_RIGHT;
 
-float VOL_RATIO                 = 1.f;
-bool GUI_DISABLE                = false;
-bool FILE_INITD                 = false;
-bool MOUSE_ON_INPUT             = false;
-char SEPARATOR[2]               = "-";
-size_t CLILEN                   = 69;
+float   VOL_RATIO               = 1.f;
+bool    GUI_DISABLE             = false;
+bool    FILE_INITD              = false;
+bool    MOUSE_ON_INPUT          = false;
+char    SEPARATOR[2]            = "-";
+size_t  CLILEN                  = 69;
 
-size_t CHAR_COUNT               = 0;
-int SAMPLE_RATE                 = SAMPLING_RATE_48K;
-int CHANNELS                    = STEREO;
-char* RATESTR                   = NULL;
-char* STREAM_TARGET             = NULL;
-char* SAVE_PATH                 = NULL;
-char* PATH                      = NULL;
-char FNAME[MAX_FILE_CHAR+1]     = "\0";
+time_t  CLOCK                   = 0;
+time_t  CLOCK_P                 = 0;
+size_t  CHAR_COUNT              = 0;
+int     SAMPLE_RATE             = SAMPLING_RATE_48K;
+int     CHANNELS                = STEREO;
+char*   RATESTR                 = NULL;
+char*   STREAM_TARGET           = NULL;
+char*   SAVE_PATH               = NULL;
+char*   PATH                    = NULL;
+char    TIME[64]                = "";
+char    FNAME[MAX_FILE_CHAR+1]  = "\0";
 
 int rc;
 pthread_t guiThread;
@@ -191,15 +194,21 @@ int main(int argc, char *argv[])
                         if (transport.recTrackBtn.isPressed) {
                                 transport.recTrackBtn.isPressed = false;
                         } else {
+                                if (!transport.pauseTrackBtn.isPressed) {
+                                        CLOCK = time(NULL);
+                                } else {
+                                        CLOCK += time(NULL) - CLOCK_P;
+                                        CLOCK_P = 0;
+                                }
+
                                 transport.recTrackBtn.isPressed = true;
+                                transport.pauseTrackBtn.isPressed = false;
                         }
                 }
 
                 if (transport.pauseTrackBtn.isHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                         if (!transport.pauseTrackBtn.isPressed) {
-                                if (transport.armTrackBtn.isPressed)
-                                        transport.armTrackBtn.isPressed = false;
-
+                                CLOCK_P = time(NULL);
                                 if (transport.recTrackBtn.isPressed)
                                         transport.recTrackBtn.isPressed = false;
 
@@ -249,14 +258,10 @@ int main(int argc, char *argv[])
                 BeginDrawing();
                 ClearBackground(BLACK);
                 DrawTexture(backgroundTexture, 0, 0, WHITE);
-                DrawTexture(screenTexture, SCREEN_X, SCREEN_Y, WHITE);
-                DrawRectangleLines(SCREEN_X, SCREEN_Y, SCREEN_W, SCREEN_H, SCREEN_BORDER_C);
-                drawInfo(&DATA, SFINFO);
+                drawController();
+                drawTransport();
                 drawVolumeMeters(faderTexture);
                 drawVolumeValues();
-                DrawTexture(transportTexture, TRANSPORT_X, TRANSPORT_Y, WHITE);
-                DrawRectangleLines(TRANSPORT_X, TRANSPORT_Y, TRANSPORT_W, TRANSPORT_H, BLACK);
-                drawControls();
                 EndDrawing();
         }
 

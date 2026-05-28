@@ -2,9 +2,10 @@
 
 ## 0.0.10
 - [ ] UI update.
-  * [ ] New fader / volume section.
+  * [ ] New fader / volume section ( *VU meters* ).
   * [ ] New Transport.
   * [ ] New Info / Control "*screen*"
+  * [x] Add timer.
 - [ ] Save files to a different directory ( GUI mode ).
 - [x] Fader volume display fix.
 
