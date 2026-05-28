@@ -40,3 +40,6 @@ static struct option options[] = {
   {0,                   0,                      0,  0 }
 };
 
+int argHandle(int argc, char* argv[]);
+
+void copyFile(char* targetPath);

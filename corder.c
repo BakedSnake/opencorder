@@ -35,28 +35,6 @@ pthread_t guiThread;
 pthread_t pipeThread;
 Transport transport;
 
-void updateFileName()
-{
-        SetMouseCursor(MOUSE_CURSOR_IBEAM);
-        int key = GetCharPressed();
-
-        while (key > 0) {
-                if ((key >= 32) && (key <= 125) && (CHAR_COUNT < MAX_FILE_CHAR)) {
-                        FNAME[CHAR_COUNT] = (char)key;
-                        FNAME[CHAR_COUNT+1] = '\0';
-                        CHAR_COUNT++;
-                }
-
-                key = GetCharPressed();
-        }
-
-        if (IsKeyPressed(KEY_BACKSPACE)) {
-                CHAR_COUNT--;
-                if (CHAR_COUNT < 0) CHAR_COUNT = 0;
-                FNAME[CHAR_COUNT] = '\0';
-        }
-}
-
 void sndFileInit(char* rateStr)
 {
         if (!FILE_INITD) {
@@ -73,86 +51,6 @@ void sndFileInit(char* rateStr)
 
                 FILE_INITD = true;
         }
-}
-
-void copyFile(char* targetPath)
-{
-        char ch;
-        FILE *source, *target;
-
-        source = fopen(PATH, "r");
-        if (source == NULL) {
-                fprintf(stderr, "Source file could not be opened.\n");
-                return;
-        }
-
-        target = fopen(targetPath, "w");
-        if (target == NULL) {
-                fclose(source);
-                fprintf(stderr, "Target file could not be opened.\n");
-                return;
-        }
-
-        while ((ch = fgetc(source)) != EOF) {
-                fputc(ch, target);
-        }
-
-        printf("File copied successfully.\n");
-        fclose(source);
-        fclose(target);
-}
-
-int argHandle(int argc, char* argv[])
-{
-        int opt;
-        while ((opt = getopt_long(argc, argv, "hvf:r:o:t:nc:", options, NULL)) != -1) {
-                switch (opt) {
-                        case 'h':
-                                printf("[OpenCorder] %56s\n", "USAGE:");
-                                for (size_t i = 0; i < 69; ++i) fputs("-", stdout);
-                                printf("\n-n, %21s, %42s\n",    "--nogui",      "No GUI, CLI only.");
-                                printf("-r, %21s, %42s\n",      "--rate",       "Specify sampling rate.");
-                                printf("-c, %21s, %42s\n",      "--channels",   "Specify number of channels.");
-                                printf("-o, %21s, %42s\n",      "--output",     "Output file path.");
-                                printf("-v, %21s, %42s\n",      "--version",    "Show version.");
-                                printf("-h, %21s, %42s\n",      "--help",       "Show help.");
-                                return 1;
-                        case 'v':
-                                printf("[OpenCorder] %56s\n", "MIT 2026");
-                                for (size_t i = 0; i < 69; ++i) fputs("-", stdout);
-                                printf("\nVersion: %60s\n", VERSION);
-                                return 1;
-                        case 'o':
-                                PATH = optarg;
-                                transport.armTrackBtn.isPressed = true;
-                                transport.recTrackBtn.isPressed = true;
-                                if (PATH) strncpy(FNAME, PATH, MAX_FILE_CHAR);
-                                else strncpy(FNAME, "recording.wav", MAX_FILE_CHAR);
-                                FNAME[MAX_FILE_CHAR] = '\0';
-                                sndFileInit(RATESTR);
-                                break;
-                        case 'r':
-                                RATESTR = optarg;
-                                if (atoi(RATESTR) != 0)
-                                        SAMPLE_RATE = atoi(RATESTR);
-                                break;
-                        case 't':
-                                STREAM_TARGET = optarg;
-                                break;
-                        case 'n':
-                                GUI_DISABLE = true;
-                                break;
-                        case 'c':
-                                if (atoi(optarg) != 0)
-                                        CHANNELS = atoi(optarg);
-                                break;
-                        case '?':
-                                default:
-                                break;
-               }
-        }
-
-        return 0;
 }
 
 int main(int argc, char *argv[])
@@ -249,8 +147,6 @@ int main(int argc, char *argv[])
                         SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
 
                 if (sampleRateIsHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                        // toggle sample rate for now
-                        // sfinfo.samplerate = samplerate;
                         switch (SAMPLE_RATE) {
                                 case SAMPLING_RATE_48K:
                                 SAMPLE_RATE = SAMPLING_RATE_44K;
@@ -271,7 +167,6 @@ int main(int argc, char *argv[])
                         SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
 
                 if (channelsIsHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                        // sfinfo.channels = samplerate;
                         switch (CHANNELS) {
                                 case STEREO:
                                 CHANNELS = MONO;
@@ -376,3 +271,84 @@ int main(int argc, char *argv[])
         CloseWindow();
         return 0;
 }
+
+int argHandle(int argc, char* argv[])
+{
+        int opt;
+        while ((opt = getopt_long(argc, argv, "hvf:r:o:t:nc:", options, NULL)) != -1) {
+                switch (opt) {
+                        case 'h':
+                                printf("[OpenCorder] %56s\n", "USAGE:");
+                                for (size_t i = 0; i < CLILEN; ++i) fputs("-", stdout);
+                                printf("\n-n, %21s, %42s\n",    "--nogui",      "No GUI, CLI only.");
+                                printf("-r, %21s, %42s\n",      "--rate",       "Specify sampling rate.");
+                                printf("-c, %21s, %42s\n",      "--channels",   "Specify number of channels.");
+                                printf("-o, %21s, %42s\n",      "--output",     "Output file path.");
+                                printf("-v, %21s, %42s\n",      "--version",    "Show version.");
+                                printf("-h, %21s, %42s\n",      "--help",       "Show help.");
+                                return 1;
+                        case 'v':
+                                printf("[OpenCorder] %56s\n", "MIT 2026");
+                                for (size_t i = 0; i < CLILEN; ++i) fputs("-", stdout);
+                                printf("\nVersion: %60s\n", VERSION);
+                                return 1;
+                        case 'o':
+                                PATH = optarg;
+                                transport.armTrackBtn.isPressed = true;
+                                transport.recTrackBtn.isPressed = true;
+                                if (PATH) strncpy(FNAME, PATH, MAX_FILE_CHAR);
+                                else strncpy(FNAME, "recording.wav", MAX_FILE_CHAR);
+                                FNAME[MAX_FILE_CHAR] = '\0';
+                                sndFileInit(RATESTR);
+                                break;
+                        case 'r':
+                                RATESTR = optarg;
+                                if (atoi(RATESTR) != 0)
+                                        SAMPLE_RATE = atoi(RATESTR);
+                                break;
+                        case 't':
+                                STREAM_TARGET = optarg;
+                                break;
+                        case 'n':
+                                GUI_DISABLE = true;
+                                break;
+                        case 'c':
+                                if (atoi(optarg) != 0)
+                                        CHANNELS = atoi(optarg);
+                                break;
+                        case '?':
+                                default:
+                                break;
+               }
+        }
+
+        return 0;
+}
+
+void copyFile(char* targetPath)
+{
+        char ch;
+        FILE *source, *target;
+
+        source = fopen(PATH, "r");
+        if (source == NULL) {
+                fprintf(stderr, "Source file could not be opened.\n");
+                return;
+        }
+
+        target = fopen(targetPath, "w");
+        if (target == NULL) {
+                fclose(source);
+                fprintf(stderr, "Target file could not be opened.\n");
+                return;
+        }
+
+        while ((ch = fgetc(source)) != EOF) {
+                fputc(ch, target);
+        }
+
+        printf("File copied successfully.\n");
+        fclose(source);
+        fclose(target);
+}
+
