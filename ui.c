@@ -135,27 +135,31 @@ void drawVuMeters()
         DrawRectangle(LEFT_VU_X, LEFT_VU_Y, VU_W, VU_H, RAYWHITE);
         DrawRectangle(RIGHT_VU_X, RIGHT_VU_Y, VU_W, VU_H, RAYWHITE);
 
-        float angle = -45.f + SAMPLE_LEFT * 90.f;
-        if (angle > 45) angle = 45;
-        float radius = angle * DEG2RAD;
+        float langle = -45.f + SAMPLE_LEFT * 90.f;
+        if (langle > 45) langle = 45;
+        float lrad = langle * DEG2RAD;
 
         DrawRing((Vector2){LEFT_NEEDLE_X, LEFT_NEEDLE_Y}, 60, 70, -135, -41, 24, Fade(RED, .4f));
         DrawRing((Vector2){LEFT_NEEDLE_X, LEFT_NEEDLE_Y}, 60, 70, -69, -41, 24, RED);
 
         Vector2 lstart = {LEFT_NEEDLE_X, LEFT_NEEDLE_Y};
         Vector2 lend = {
-                lstart.x + NEEDLE_LEN * sinf(radius),
-                lstart.y - NEEDLE_LEN * cosf(radius)
+                lstart.x + NEEDLE_LEN * sinf(lrad),
+                lstart.y - NEEDLE_LEN * cosf(lrad)
         };
         DrawLineEx(lstart, lend, NEEDLE_THICKNESS, DARKBLUE);
         DrawCircle(LEFT_NEEDLE_X, LEFT_NEDL_HOLD_Y, NEEDLE_HOLD_THIC, BLACK);
+
+        float rangle = -45.f + SAMPLE_RIGHT * 90.f;
+        if (rangle > 45) rangle = 45;
+        float rrad = rangle * DEG2RAD;
 
         DrawRing((Vector2){RIGHT_NEEDLE_X, RIGHT_NEEDLE_Y}, 60, 70, -135, -41, 24, Fade(RED, .4f));
         DrawRing((Vector2){RIGHT_NEEDLE_X, RIGHT_NEEDLE_Y}, 60, 70, -69, -41, 24, RED);
         Vector2 rstart = {RIGHT_NEEDLE_X, RIGHT_NEEDLE_Y};
         Vector2 rend = {
-                rstart.x + NEEDLE_LEN * sinf(radius),
-                rstart.y - NEEDLE_LEN * cosf(radius)
+                rstart.x + NEEDLE_LEN * sinf(rrad),
+                rstart.y - NEEDLE_LEN * cosf(rrad)
         };
         DrawLineEx(rstart, rend, NEEDLE_THICKNESS, DARKBLUE);
         DrawCircle(RIGHT_NEEDLE_X, RIGHT_NEDL_HOLD_Y, NEEDLE_HOLD_THIC, BLACK);

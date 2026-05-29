@@ -48,11 +48,13 @@ static void on_process(void *userdata)
                         max = 0.0f;
                         for (n = c; n < n_samples; n += n_channels) {
                                 max = fmaxf(max, fabsf(samples[n]));
+
+                                if (n == 0) SAMPLE_LEFT = max;
+                                if (n == 1) SAMPLE_RIGHT = max;
                         }
 
-                        SAMPLE_LEFT = c == 0 ? max / VOL_RATIO : SAMPLE_LEFT;
-                        SAMPLE_RIGHT = c == 1 ? max / VOL_RATIO : SAMPLE_RIGHT;
-
+                        SAMPLE_LEFT /= VOL_RATIO;
+                        SAMPLE_RIGHT /= VOL_RATIO;
                         peak = (uint32_t)SPA_CLAMPF(max * 30, 0.f, 39.f);
 
                         if (GUI_DISABLE) {
