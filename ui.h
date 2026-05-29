@@ -52,13 +52,30 @@
 #define METER_PADDING           34
 #define METER_THICKNESS         1
 #define METER_COLOR             GREEN
+/* VU Meters */
+#define VU_W                    140
+#define VU_H                    90
+#define LEFT_VU_X               (400 + 200/2.) - VU_W/2.
+#define LEFT_VU_Y               20
+#define RIGHT_VU_X              (400 + 200/2.) - VU_W/2.
+#define RIGHT_VU_Y              VU_H + 40
+#define VU_A                    0.f
+#define NEEDLE_LEN              70
+#define LEFT_NEEDLE_X           LEFT_VU_X+VU_W/2.
+#define LEFT_NEEDLE_Y           108
+#define RIGHT_NEEDLE_X          RIGHT_VU_X+VU_W/2.
+#define RIGHT_NEEDLE_Y          218
+#define NEEDLE_THICKNESS        2
+#define NEEDLE_HOLD_THIC        8.f
+#define LEFT_NEDL_HOLD_Y        110
+#define RIGHT_NEDL_HOLD_Y       220
 /* Volume Values */
-#define LEFT_VOLUME_VALUE_X     455
-#define LEFT_VOLUME_VALUE_Y     320
+#define LEFT_VOLUME_VALUE_X     540
+#define LEFT_VOLUME_VALUE_Y     90
 #define LEFT_VOLUME_VALUE_S     14
 #define LEFT_VOLUME_VALUE_C     RED
-#define RIGHT_VOLUME_VALUE_X    525
-#define RIGHT_VOLUME_VALUE_Y    320
+#define RIGHT_VOLUME_VALUE_X    540
+#define RIGHT_VOLUME_VALUE_Y    200
 #define RIGHT_VOLUME_VALUE_S    14
 #define RIGHT_VOLUME_VALUE_C    RED
 //* Buttons *//
@@ -115,6 +132,8 @@ void drawInfo(struct data *data, SF_INFO sfinfo);
 void drawVolumeMeters(Texture2D faderTex);
 
 void drawVolumeValues();
+
+void drawVuMeters();
 
 TextureButton newButton(Rectangle bounds, Texture2D texture, Texture2D pressedTexture, Texture2D hoverTexture, Color tint);
 

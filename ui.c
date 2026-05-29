@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <math.h>
 #include "config.h"
 #include "corder.h"
 #include "pipe.h"
@@ -88,11 +89,6 @@ void drawVolumeSection()
         DrawLineEx((Vector2){WIDTH-200, 0}, (Vector2){WIDTH-200, HEIGHT}, 2, RAYWHITE);
 }
 
-void drawVuMeters()
-{
-        drawVolumeSection();
-}
-
 void drawVolumeMeters(Texture2D faderTex)
 {
         drawVolumeSection();
@@ -127,6 +123,40 @@ void drawVolumeValues()
 
         free(left);
         free(right);
+}
+
+void drawVuMeters()
+{
+        drawVolumeSection();
+        DrawRectangle(LEFT_VU_X, LEFT_VU_Y, VU_W, VU_H, RAYWHITE);
+        DrawRectangle(RIGHT_VU_X, RIGHT_VU_Y, VU_W, VU_H, RAYWHITE);
+
+        float angle = -45.f + SAMPLE_LEFT * 90.f;
+        if (angle > 45) angle = 45;
+        float radius = angle * DEG2RAD;
+
+        DrawRing((Vector2){LEFT_NEEDLE_X, LEFT_NEEDLE_Y}, 60, 70, -135, -41, 24, Fade(RED, .4f));
+        DrawRing((Vector2){LEFT_NEEDLE_X, LEFT_NEEDLE_Y}, 60, 70, -69, -41, 24, RED);
+
+        Vector2 lstart = {LEFT_NEEDLE_X, LEFT_NEEDLE_Y};
+        Vector2 lend = {
+                lstart.x + NEEDLE_LEN * sinf(radius),
+                lstart.y - NEEDLE_LEN * cosf(radius)
+        };
+        DrawLineEx(lstart, lend, NEEDLE_THICKNESS, DARKBLUE);
+        DrawCircle(LEFT_NEEDLE_X, LEFT_NEDL_HOLD_Y, NEEDLE_HOLD_THIC, BLACK);
+
+        DrawRing((Vector2){RIGHT_NEEDLE_X, RIGHT_NEEDLE_Y}, 60, 70, -135, -41, 24, Fade(RED, .4f));
+        DrawRing((Vector2){RIGHT_NEEDLE_X, RIGHT_NEEDLE_Y}, 60, 70, -69, -41, 24, RED);
+        Vector2 rstart = {RIGHT_NEEDLE_X, RIGHT_NEEDLE_Y};
+        Vector2 rend = {
+                rstart.x + NEEDLE_LEN * sinf(radius),
+                rstart.y - NEEDLE_LEN * cosf(radius)
+        };
+        DrawLineEx(rstart, rend, NEEDLE_THICKNESS, DARKBLUE);
+        DrawCircle(RIGHT_NEEDLE_X, RIGHT_NEDL_HOLD_Y, NEEDLE_HOLD_THIC, BLACK);
+
+        drawVolumeValues();
 }
 
 TextureButton newButton(Rectangle bounds, Texture2D texture, Texture2D pressedTexture, Texture2D hoverTexture, Color tint)

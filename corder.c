@@ -260,8 +260,9 @@ int main(int argc, char *argv[])
                 DrawTexture(backgroundTexture, 0, 0, WHITE);
                 drawController();
                 drawTransport();
-                drawVolumeMeters(faderTexture);
+                //drawVolumeMeters(faderTexture);
                 drawVolumeValues();
+                drawVuMeters();
                 EndDrawing();
         }
 
