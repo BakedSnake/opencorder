@@ -78,6 +78,15 @@
 #define RIGHT_VOLUME_VALUE_Y    200
 #define RIGHT_VOLUME_VALUE_S    14
 #define RIGHT_VOLUME_VALUE_C    RED
+/* Timer */
+#define TIMER_W                 120
+#define TIMER_H                 45
+#define TIMER_X                 205
+#define TIMER_Y                 HEIGHT - 60
+#define TIMER_FONT_S            36
+#define TIMER_TEXT_X(len)       (TIMER_X-2)+(TIMER_W/2.-(len)/2.)
+#define TIMER_TEXT_Y(hi)        (TIMER_Y+2)+((TIMER_H-2)/2.-(hi)/2.)
+#define TIMER_C                 ColorFromHSV(159, 50, 40)
 //* Buttons *//
 #define BTN_W                   60
 #define BTN_H                   60

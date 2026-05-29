@@ -222,29 +222,25 @@ void drawTransportControls()
 
 void drawTimer()
 {
-#define TIMER_W 120
-#define TIMER_H 45
-#define TIMER_X 205
-#define TIMER_Y HEIGHT - 60
-        DrawRectangle(TIMER_X, TIMER_Y, TIMER_W, TIMER_H, BEIGE);
+        DrawRectangle(TIMER_X, TIMER_Y, TIMER_W, TIMER_H, TIMER_C);
         if (transport.recTrackBtn.isPressed) {
                 double diff = difftime(time(NULL), CLOCK);
                 int totalSeconds = (int)diff;
                 int minutes = totalSeconds / 60;
                 int seconds = totalSeconds % 60;
                 snprintf(TIME, 64, "%02d:%02d", minutes, seconds);
-                Vector2 dims = MeasureTextEx(GetFontDefault(), TIME, 36, 0);
-                int len = MeasureText(TIME, 36);
-                DrawText(TIME, (TIMER_X-2)+(TIMER_W/2.-(len/2.)), (TIMER_Y+2)+(TIMER_H-2)/2.-dims.y/2, 36, BLACK);
+                Vector2 dims = MeasureTextEx(GetFontDefault(), TIME, TIMER_FONT_S, 0);
+                int len = MeasureText(TIME, TIMER_FONT_S);
+                DrawText(TIME, TIMER_TEXT_X(len), TIMER_TEXT_Y(dims.y), TIMER_FONT_S, BLACK);
         } else if (transport.pauseTrackBtn.isPressed) {
-                int len = MeasureText(TIME, 36);
-                Vector2 dims = MeasureTextEx(GetFontDefault(), TIME, 36, 0);
-                DrawText(TIME, (TIMER_X-2)+(TIMER_W/2.-(len/2.)), (TIMER_Y+2)+(TIMER_H-2)/2.-dims.y/2, 36, BLACK);
+                int len = MeasureText(TIME, TIMER_FONT_S);
+                Vector2 dims = MeasureTextEx(GetFontDefault(), TIME, TIMER_FONT_S, 0);
+                DrawText(TIME, TIMER_TEXT_X(len), TIMER_TEXT_Y(dims.y), TIMER_FONT_S, BLACK);
         } else {
                 char *time = "00:00";
-                int len = MeasureText(time, 36);
-                Vector2 dims = MeasureTextEx(GetFontDefault(), time, 36, 0);
-                DrawText(time, (TIMER_X-2)+(TIMER_W/2.-(len/2.)), (TIMER_Y+2)+(TIMER_H-2)/2.-dims.y/2, 36, BLACK);
+                int len = MeasureText(time, TIMER_FONT_S);
+                Vector2 dims = MeasureTextEx(GetFontDefault(), time, TIMER_FONT_S, 0);
+                DrawText(time, TIMER_TEXT_X(len), TIMER_TEXT_Y(dims.y), TIMER_FONT_S, BLACK);
         }
 }
 
