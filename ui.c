@@ -8,24 +8,34 @@
 #include "pipe.h"
 #include "ui.h"
 
-Rectangle fileNameInput         = (Rectangle){ HEADER_INPUT_X, HEADER_FILE_Y,   HEADER_INPUT_WIDTH, HEADER_HEIGHT };
-Rectangle sampleRateInput       = (Rectangle){ HEADER_INPUT_X, HEADER_RATE_Y,   HEADER_INPUT_WIDTH, HEADER_HEIGHT };
-Rectangle channelsInput         = (Rectangle){ HEADER_INPUT_X, HEADER_MASTER_Y, HEADER_INPUT_WIDTH, HEADER_HEIGHT };
+Rectangle fileNameInput         = (Rectangle){ HEADER_INPUT_X, HEADER_INPUT_Y,   HEADER_INPUT_WIDTH, HEADER_H };
+Rectangle sampleRateInput       = (Rectangle){ HEADER_INPUT_X, HEADER_RATE_INPUT_Y,   HEADER_INPUT_WIDTH, HEADER_H };
+Rectangle channelsInputBase     = (Rectangle){ WIDTH-PUSH_BTN_W-50, HEADER_MASTER_Y, PUSH_BSE_W, PUSH_BSE_H };
+Rectangle channelsInput         = (Rectangle){ WIDTH-PUSH_BTN_W-50, HEADER_MASTER_Y, PUSH_BTN_W, PUSH_BTN_H };
+
+PushButton newPushButton(Rectangle bounds, Rectangle mesure)
+{
+        PushButton new = { bounds, mesure, false, false };
+        return new;
+}
+
+void drawPushButton(PushButton btn)
+{
+        DrawRectangle(btn.bounds.x, btn.bounds.y, PUSH_BSE_W, PUSH_BSE_H, PUSH_BSE_C);
+        DrawRectangle(btn.mesure.x, btn.mesure.y, PUSH_BTN_W, PUSH_BTN_H, PUSH_BTN_C);
+}
 
 void drawheader()
 {
-        DrawRectangle(HEADER_X, HEADER_FILE_Y, HEADER_WIDTH, HEADER_HEIGHT, HEADER_BG_COLOR);
-        DrawRectangleLines(HEADER_X, HEADER_FILE_Y, HEADER_WIDTH, HEADER_HEIGHT, HEADER_FG_COLOR);
+        DrawRectangle(HEADER_X, HEADER_FILE_Y, HEADER_W, HEADER_H, HEADER_BG_COLOR);
+        DrawRectangleLines(HEADER_X, HEADER_FILE_Y, HEADER_W, HEADER_H, HEADER_BG_COLOR);
         DrawText("File name", HEADER_TEXT_X, HEADER_FILE_TEXT_Y, HEADER_TEXT_SIZE, HEADER_FG_COLOR);
-        DrawRectangle(HEADER_X, HEADER_RATE_Y, HEADER_WIDTH, HEADER_HEIGHT, HEADER_BG_COLOR);
-        DrawRectangleLines(HEADER_X, HEADER_RATE_Y, HEADER_WIDTH, HEADER_HEIGHT, HEADER_FG_COLOR);
+        DrawRectangle(HEADER_X, HEADER_RATE_Y, HEADER_W, HEADER_H, HEADER_BG_COLOR);
+        DrawRectangleLines(HEADER_X, HEADER_RATE_Y, HEADER_W, HEADER_H, HEADER_BG_COLOR);
         DrawText("Sample rate", HEADER_TEXT_X, HEADER_RATE_TEXT_Y, HEADER_TEXT_SIZE, HEADER_FG_COLOR);
-        DrawRectangle(HEADER_X, HEADER_MASTER_Y, HEADER_WIDTH, HEADER_HEIGHT, HEADER_BG_COLOR);
-        DrawRectangleLines(HEADER_X, HEADER_MASTER_Y, HEADER_WIDTH, HEADER_HEIGHT, HEADER_FG_COLOR);
-        DrawText("Master", HEADER_TEXT_X, HEADER_MASTER_TEXT_Y, HEADER_TEXT_SIZE, HEADER_FG_COLOR);
 
         // filename
-        DrawRectangle(HEADER_INPUT_X, HEADER_FILE_Y, HEADER_INPUT_WIDTH, HEADER_HEIGHT, HEADER_FG_COLOR);
+        DrawRectangle(HEADER_INPUT_X, HEADER_INPUT_Y, HEADER_INPUT_WIDTH, HEADER_H, HEADER_FG_COLOR);
         DrawRectangleLines(
                         fileNameInput.x,
                         fileNameInput.y,
@@ -34,19 +44,11 @@ void drawheader()
                         HEADER_BORDER_COLOR
         );
         // sample rate
-        DrawRectangle(HEADER_INPUT_X, HEADER_RATE_Y, HEADER_INPUT_WIDTH, HEADER_HEIGHT, HEADER_FG_COLOR);
+        DrawRectangle(HEADER_INPUT_X, HEADER_RATE_INPUT_Y, HEADER_INPUT_WIDTH, HEADER_H, HEADER_FG_COLOR);
         DrawRectangleLines(sampleRateInput.x,
                         sampleRateInput.y,
                         sampleRateInput.width,
                         sampleRateInput.height,
-                        HEADER_BORDER_COLOR
-        );
-        // channels
-        DrawRectangle(HEADER_INPUT_X, HEADER_MASTER_Y, HEADER_INPUT_WIDTH, HEADER_HEIGHT, HEADER_FG_COLOR);
-        DrawRectangleLines(channelsInput.x,
-                        channelsInput.y,
-                        channelsInput.width,
-                        channelsInput.height,
                         HEADER_BORDER_COLOR
         );
 }
@@ -70,7 +72,10 @@ void drawInfo(struct data *data, SF_INFO sfinfo)
         if (chans == 1)
                 snprintf(master, MASTER_TEXT_LENGTH, "%s", "Mono  ");
 
-        DrawText(master, INFO_TEXT_X, MASTER_TEXT_Y, INFO_TEXT_SIZE, BEIGE);
+        DrawText(master, HEADER_X, MASTER_TEXT_Y, INFO_TEXT_SIZE, BEIGE);
+
+        PushButton masterBtn = newPushButton(channelsInputBase, channelsInput);
+        drawPushButton(masterBtn);
 }
 
 void drawController()
@@ -80,13 +85,12 @@ void drawController()
 #define CONTROLLER_X 0
 #define CONTROLLER_Y 0
         DrawRectangle(CONTROLLER_X, CONTROLLER_Y, CONTROLLER_W, CONTROLLER_H, BLACK);
-        drawInfo(&DATA, SFINFO);
 }
 
 void drawVolumeSection()
 {
         DrawRectangle(WIDTH-200, 0, 200, HEIGHT, BLACK);
-        DrawLineEx((Vector2){WIDTH-200, 0}, (Vector2){WIDTH-200, HEIGHT}, 2, RAYWHITE);
+        DrawLineEx((Vector2){WIDTH-200, 5}, (Vector2){WIDTH-200, HEIGHT-5}, 2, RAYWHITE);
 }
 
 void drawVolumeMeters(Texture2D faderTex)
@@ -157,6 +161,7 @@ void drawVuMeters()
         DrawCircle(RIGHT_NEEDLE_X, RIGHT_NEDL_HOLD_Y, NEEDLE_HOLD_THIC, BLACK);
 
         drawVolumeValues();
+        drawInfo(&DATA, SFINFO);
 }
 
 TextureButton newButton(Rectangle bounds, Texture2D texture, Texture2D pressedTexture, Texture2D hoverTexture, Color tint)
@@ -247,7 +252,7 @@ void drawTimer()
 void drawTransport()
 {
         DrawRectangle(TRANSPORT_X, TRANSPORT_Y, TRANSPORT_W, TRANSPORT_H, BLACK);
-        DrawLineEx((Vector2){TRANSPORT_X, TRANSPORT_Y}, (Vector2){400, TRANSPORT_Y}, 2, RAYWHITE);
+        DrawLineEx((Vector2){TRANSPORT_X+5, TRANSPORT_Y}, (Vector2){400, TRANSPORT_Y}, 2, RAYWHITE);
         drawTransportControls();
         drawTimer();
 }

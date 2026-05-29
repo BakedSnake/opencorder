@@ -16,30 +16,32 @@
 #define TRANSPORT_Y             HEIGHT - TRANSPORT_H
 #define TRANSPORT_BORDER_C      BLACK
 /* Header */
-#define HEADER_X                10
-#define HEADER_TEXT_X           12
-#define HEADER_WIDTH            85
-#define HEADER_HEIGHT           18
+#define HEADER_H                18
+#define HEADER_W                140
+#define HEADER_X                (400 + 200/2.) - HEADER_W/2.
+#define HEADER_TEXT_X           HEADER_X+2
 #define HEADER_TEXT_SIZE        14
-#define HEADER_FILE_Y           13
-#define HEADER_FILE_TEXT_Y      15
-#define HEADER_RATE_Y           31
-#define HEADER_RATE_TEXT_Y      33
-#define HEADER_MASTER_Y         49
+#define HEADER_FILE_Y           243
+#define HEADER_FILE_TEXT_Y      245
+#define HEADER_RATE_Y           243+(HEADER_H*2)
+#define HEADER_RATE_TEXT_Y      243+(HEADER_H*2)+1
+#define HEADER_RATE_INPUT_Y     243+(HEADER_H*3)
+#define HEADER_MASTER_Y         243+(HEADER_H*4)+8
 #define HEADER_MASTER_TEXT_Y    52
 #define HEADER_BG_COLOR         LIGHTGRAY
 #define HEADER_FG_COLOR         BLACK
 #define HEADER_BORDER_COLOR     RAYWHITE
-#define HEADER_INPUT_X          84
-#define HEADER_INPUT_WIDTH      135
+#define HEADER_INPUT_X          HEADER_X
+#define HEADER_INPUT_Y          HEADER_FILE_Y+HEADER_H
+#define HEADER_INPUT_WIDTH      140
 /* Info */
 #define INFO_TEXT_SIZE          14
-#define INFO_TEXT_X             92
+#define INFO_TEXT_X             HEADER_X+2
 #define RATE_TEXT_LENGTH        9
-#define RATE_TEXT_Y             33
+#define RATE_TEXT_Y             HEADER_RATE_INPUT_Y+2
 #define MASTER_TEXT_LENGTH      7
-#define MASTER_TEXT_Y           52
-#define FILE_NAME_Y             15
+#define MASTER_TEXT_Y           243+(HEADER_H*4)+12
+#define FILE_NAME_Y             HEADER_INPUT_Y+2
 /* Meters */
 #define FADER_HEIGHT            280
 #define FADER_WIDTH             30
@@ -107,9 +109,17 @@
 #define PAUSE_BTN_Y             HEIGHT - BTN_H
 #define BTN_SCALE               .75f
 
+#define PUSH_BTN_W              20
+#define PUSH_BTN_H              20
+#define PUSH_BTN_C              DARKGRAY
+#define PUSH_BSE_W              40
+#define PUSH_BSE_H              20
+#define PUSH_BSE_C              DARKBROWN
+
 extern Rectangle fileNameInput;
 extern Rectangle sampleRateInput;
 extern Rectangle channelsInput;
+extern Rectangle channelsInputBase;
 extern Rectangle newFileInput;
 extern Rectangle saveFileInput;
 
@@ -122,6 +132,14 @@ typedef struct TextureButton {
         bool isPressed;
         bool isHovered;
 } TextureButton;
+
+typedef struct PushButton {
+        Rectangle bounds;
+        Rectangle mesure;
+        Color color;
+        bool isPressed;
+        bool isHovered;
+} PushButton;
 
 typedef struct Transport {
         TextureButton stopTrackBtn;

@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
 
                 bool filenameIsHovered = CheckCollisionPointRec(mousePos, fileNameInput);
                 bool sampleRateIsHovered = CheckCollisionPointRec(mousePos, sampleRateInput);
-                bool channelsIsHovered = CheckCollisionPointRec(mousePos, channelsInput);
+                bool channelsIsHovered = CheckCollisionPointRec(mousePos, channelsInputBase);
 
                 transport.newFileBtn.isHovered    = CheckCollisionPointRec(mousePos, transport.newFileBtn.bounds);
                 transport.saveFileBtn.isHovered   = CheckCollisionPointRec(mousePos, transport.saveFileBtn.bounds);
@@ -173,9 +173,11 @@ int main(int argc, char *argv[])
                         switch (CHANNELS) {
                                 case STEREO:
                                 CHANNELS = MONO;
+                                channelsInput.x += 20;
                                 break;
                                 default:
                                 CHANNELS = STEREO;
+                                channelsInput.x -= 20;
                                 break;
                         }
                 }
