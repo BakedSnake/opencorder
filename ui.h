@@ -88,7 +88,8 @@
 #define TIMER_FONT_S            36
 #define TIMER_TEXT_X(len)       (TIMER_X-2)+(TIMER_W/2.-(len)/2.)
 #define TIMER_TEXT_Y(hi)        (TIMER_Y+2)+((TIMER_H-2)/2.-(hi)/2.)
-#define TIMER_C                 ColorFromHSV(159, 50, 40)
+#define TIMER_C                 GetColor(0xAC3B4AFF)
+#define TIMER_FONT_C            GetColor(0x62222AFF)
 //* Buttons *//
 #define BTN_W                   60
 #define BTN_H                   60
@@ -111,10 +112,10 @@
 
 #define PUSH_BTN_W              20
 #define PUSH_BTN_H              20
-#define PUSH_BTN_C              DARKGRAY
+#define PUSH_BTN_C              GetColor(0x202020FF)
 #define PUSH_BSE_W              40
 #define PUSH_BSE_H              20
-#define PUSH_BSE_C              DARKBROWN
+#define PUSH_BSE_C              GetColor(0x333333FF)
 
 extern Rectangle fileNameInput;
 extern Rectangle sampleRateInput;
@@ -133,13 +134,13 @@ typedef struct TextureButton {
         bool isHovered;
 } TextureButton;
 
-typedef struct PushButton {
+typedef struct ButtonSwitch {
         Rectangle bounds;
-        Rectangle mesure;
+        Rectangle measure;
         Color color;
         bool isPressed;
         bool isHovered;
-} PushButton;
+} ButtonSwitch;
 
 typedef struct Transport {
         TextureButton stopTrackBtn;

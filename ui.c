@@ -13,16 +13,16 @@ Rectangle sampleRateInput       = (Rectangle){ HEADER_INPUT_X, HEADER_RATE_INPUT
 Rectangle channelsInputBase     = (Rectangle){ WIDTH-PUSH_BTN_W-50, HEADER_MASTER_Y, PUSH_BSE_W, PUSH_BSE_H };
 Rectangle channelsInput         = (Rectangle){ WIDTH-PUSH_BTN_W-50, HEADER_MASTER_Y, PUSH_BTN_W, PUSH_BTN_H };
 
-PushButton newPushButton(Rectangle bounds, Rectangle mesure)
+ButtonSwitch newPushButton(Rectangle bounds, Rectangle measure)
 {
-        PushButton new = { bounds, mesure, false, false };
+        ButtonSwitch new = { bounds, measure, { false, false } };
         return new;
 }
 
-void drawPushButton(PushButton btn)
+void drawPushButton(ButtonSwitch btn)
 {
         DrawRectangle(btn.bounds.x, btn.bounds.y, PUSH_BSE_W, PUSH_BSE_H, PUSH_BSE_C);
-        DrawRectangle(btn.mesure.x, btn.mesure.y, PUSH_BTN_W, PUSH_BTN_H, PUSH_BTN_C);
+        DrawRectangle(btn.measure.x, btn.measure.y, PUSH_BTN_W, PUSH_BTN_H, PUSH_BTN_C);
 }
 
 void drawheader()
@@ -74,7 +74,7 @@ void drawInfo(struct data *data, SF_INFO sfinfo)
 
         DrawText(master, HEADER_X, MASTER_TEXT_Y, INFO_TEXT_SIZE, BEIGE);
 
-        PushButton masterBtn = newPushButton(channelsInputBase, channelsInput);
+        ButtonSwitch masterBtn = newPushButton(channelsInputBase, channelsInput);
         drawPushButton(masterBtn);
 }
 
@@ -240,16 +240,16 @@ void drawTimer()
                 snprintf(TIME, 64, "%02d:%02d", minutes, seconds);
                 Vector2 dims = MeasureTextEx(GetFontDefault(), TIME, TIMER_FONT_S, 0);
                 int len = MeasureText(TIME, TIMER_FONT_S);
-                DrawText(TIME, TIMER_TEXT_X(len), TIMER_TEXT_Y(dims.y), TIMER_FONT_S, BLACK);
+                DrawText(TIME, TIMER_TEXT_X(len), TIMER_TEXT_Y(dims.y), TIMER_FONT_S, TIMER_FONT_C);
         } else if (transport.pauseTrackBtn.isPressed) {
                 int len = MeasureText(TIME, TIMER_FONT_S);
                 Vector2 dims = MeasureTextEx(GetFontDefault(), TIME, TIMER_FONT_S, 0);
-                DrawText(TIME, TIMER_TEXT_X(len), TIMER_TEXT_Y(dims.y), TIMER_FONT_S, BLACK);
+                DrawText(TIME, TIMER_TEXT_X(len), TIMER_TEXT_Y(dims.y), TIMER_FONT_S, TIMER_FONT_C);
         } else {
                 char *time = "00:00";
                 int len = MeasureText(time, TIMER_FONT_S);
                 Vector2 dims = MeasureTextEx(GetFontDefault(), time, TIMER_FONT_S, 0);
-                DrawText(time, TIMER_TEXT_X(len), TIMER_TEXT_Y(dims.y), TIMER_FONT_S, BLACK);
+                DrawText(time, TIMER_TEXT_X(len), TIMER_TEXT_Y(dims.y), TIMER_FONT_S, TIMER_FONT_C);
         }
 }
 
