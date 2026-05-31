@@ -92,14 +92,14 @@
 #define TIMER_FONT_C            GetColor(0x62222AFF)
 //* Buttons *//
 #define BTN_W                   60
-#define BTN_H                   60
+#define BTN_H                   50
 #define SMALL_BTN_H             30
 #define HIGH_BTN_Y              HEIGHT - BTN_H
 #define LOW_BTN_Y               HEIGHT - BTN_H + 30
 #define NEW_BTN_X               340
-#define NEW_BTN_Y               HIGH_BTN_Y
+#define NEW_BTN_Y               HEIGHT - BTN_H - 10
 #define SAVE_BTN_X              340
-#define SAVE_BTN_Y              LOW_BTN_Y
+#define SAVE_BTN_Y              HEIGHT - (BTN_H/2.) - 10
 #define STOP_BTN_X              10
 #define STOP_BTN_Y              HEIGHT - BTN_H
 #define ARM_BTN_X               57
@@ -108,7 +108,7 @@
 #define REC_BTN_Y               HEIGHT - BTN_H
 #define PAUSE_BTN_X             151
 #define PAUSE_BTN_Y             HEIGHT - BTN_H
-#define BTN_SCALE               .75f
+#define BTN_SCALE               1.f
 
 #define PUSH_BTN_W              20
 #define PUSH_BTN_H              20
