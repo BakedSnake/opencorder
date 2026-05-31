@@ -90,19 +90,19 @@ int main(int argc, char *argv[])
         Texture2D transportTexture  = LoadTexture("/usr/share/opencorder/assets/Transport.png");
         Texture2D faderTexture      = LoadTexture("/usr/share/opencorder/assets/Fader.png");
 
-        Texture2D armTrack          = LoadTexture("/usr/share/opencorder/assets/arm-track.png");
-        Texture2D armTrackPressed   = LoadTexture("/usr/share/opencorder/assets/arm-track-pressed.png");
-        Texture2D recTrack          = LoadTexture("/usr/share/opencorder/assets/play.png");
-        Texture2D recTrackPressed   = LoadTexture("/usr/share/opencorder/assets/play-pressed.png");
-        Texture2D stopTrack         = LoadTexture("/usr/share/opencorder/assets/stop-track.png");
-        Texture2D stopTrackPressed  = LoadTexture("/usr/share/opencorder/assets/stop-track-pressed.png");
-        Texture2D pauseTrack        = LoadTexture("/usr/share/opencorder/assets/pause-track.png");
-        Texture2D pauseTrackPressed = LoadTexture("/usr/share/opencorder/assets/pause-track-pressed.png");
+        Texture2D armTrack          = LoadTexture("/usr/share/opencorder/assets/arm-button-t.png");
+        Texture2D armTrackPressed   = LoadTexture("/usr/share/opencorder/assets/arm-button-t-pressed.png");
+        Texture2D recTrack          = LoadTexture("/usr/share/opencorder/assets/play-button-t.png");
+        Texture2D recTrackPressed   = LoadTexture("/usr/share/opencorder/assets/play-button-t-pressed.png");
+        Texture2D stopTrack         = LoadTexture("/usr/share/opencorder/assets/stop-button-t.png");
+        Texture2D stopTrackPressed  = LoadTexture("/usr/share/opencorder/assets/stop-button-pressed.png");
+        Texture2D pauseTrack        = LoadTexture("/usr/share/opencorder/assets/pause-button-t.png");
+        Texture2D pauseTrackPressed = LoadTexture("/usr/share/opencorder/assets/pause-button-t-pressed.png");
 
-        Texture2D newFile           = LoadTexture("/usr/share/opencorder/assets/new.png");
-        Texture2D newFilePressed    = LoadTexture("/usr/share/opencorder/assets/new-pressed.png");
-        Texture2D saveFile          = LoadTexture("/usr/share/opencorder/assets/save.png");
-        Texture2D saveFilePressed   = LoadTexture("/usr/share/opencorder/assets/save-pressed.png");
+        Texture2D newFile           = LoadTexture("/usr/share/opencorder/assets/new-button-t.png");
+        Texture2D newFilePressed    = LoadTexture("/usr/share/opencorder/assets/new-button-t-pressed.png");
+        Texture2D saveFile          = LoadTexture("/usr/share/opencorder/assets/save-button-t.png");
+        Texture2D saveFilePressed   = LoadTexture("/usr/share/opencorder/assets/save-button-t-pressed.png");
 
         TextureButton stopBtn   = newButton((Rectangle){ STOP_BTN_X,    HIGH_BTN_Y, BTN_W, BTN_H        },
                         stopTrack, stopTrackPressed, stopTrack, WHITE);
@@ -112,9 +112,9 @@ int main(int argc, char *argv[])
                         recTrack, recTrackPressed, recTrack, WHITE);
         TextureButton pauseBtn  = newButton((Rectangle){ PAUSE_BTN_X,   HIGH_BTN_Y, BTN_W, BTN_H        },
                         pauseTrack, pauseTrackPressed, pauseTrack, WHITE);
-        TextureButton newBtn    = newButton((Rectangle){ NEW_BTN_X,     HIGH_BTN_Y, BTN_W, SMALL_BTN_H  },
+        TextureButton newBtn    = newButton((Rectangle){ NEW_BTN_X,     NEW_BTN_Y, BTN_W, SMALL_BTN_H  },
                         newFile, newFilePressed, newFile, WHITE);
-        TextureButton saveBtn   = newButton((Rectangle){ SAVE_BTN_X,    LOW_BTN_Y, BTN_W,  SMALL_BTN_H  },
+        TextureButton saveBtn   = newButton((Rectangle){ SAVE_BTN_X,    SAVE_BTN_Y, BTN_W,  SMALL_BTN_H  },
                         saveFile, saveFilePressed, saveFile, WHITE);
 
         transport.stopTrackBtn  = stopBtn;
