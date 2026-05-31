@@ -221,8 +221,8 @@ void drawTransportControls()
         else if (transport.saveFileBtn.isHovered)
                 currSaveFileTexture = transport.saveFileBtn.hoverTexture;
 
-        DrawTextureEx(currNewFileTexture,       (Vector2){NEW_BTN_X,    HIGH_BTN_Y}, .0f, BTN_SCALE, WHITE);
-        DrawTextureEx(currSaveFileTexture,      (Vector2){SAVE_BTN_X,   LOW_BTN_Y }, .0f, BTN_SCALE, WHITE);
+        DrawTextureEx(currNewFileTexture,       (Vector2){NEW_BTN_X,    NEW_BTN_Y}, .0f, BTN_SCALE, WHITE);
+        DrawTextureEx(currSaveFileTexture,      (Vector2){SAVE_BTN_X,   SAVE_BTN_Y }, .0f, BTN_SCALE, WHITE);
         DrawTextureEx(currStopTrackTexture,     (Vector2){STOP_BTN_X ,  HIGH_BTN_Y}, .0f, BTN_SCALE, WHITE);
         DrawTextureEx(currArmTrackTexture,      (Vector2){ARM_BTN_X ,   HIGH_BTN_Y}, .0f, BTN_SCALE, WHITE);
         DrawTextureEx(currRecTrackTexture,      (Vector2){REC_BTN_X,    HIGH_BTN_Y}, .0f, BTN_SCALE, WHITE);
