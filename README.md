@@ -11,6 +11,7 @@ This project is still a work in progress. Once there is a stable build, it will 
 ## Build
 ```bash
 make
+make config # optional config file for defaults
 ```
 
 ## Install
