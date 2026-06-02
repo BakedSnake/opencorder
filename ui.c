@@ -8,10 +8,14 @@
 #include "pipe.h"
 #include "ui.h"
 
-Rectangle fileNameInput         = (Rectangle){ HEADER_INPUT_X, HEADER_INPUT_Y,   HEADER_INPUT_WIDTH, HEADER_H };
-Rectangle sampleRateInput       = (Rectangle){ HEADER_INPUT_X, HEADER_RATE_INPUT_Y,   HEADER_INPUT_WIDTH, HEADER_H };
-Rectangle channelsInputBase     = (Rectangle){ WIDTH-PUSH_BTN_W-50, HEADER_MASTER_Y, PUSH_BSE_W, PUSH_BSE_H };
-Rectangle channelsInput         = (Rectangle){ WIDTH-PUSH_BTN_W-50, HEADER_MASTER_Y, PUSH_BTN_W, PUSH_BTN_H };
+Rectangle FILENAME_INPUT         = (Rectangle){ HEADER_INPUT_X, HEADER_INPUT_Y,   HEADER_INPUT_WIDTH, HEADER_H };
+Rectangle SAMPLERATE_INPUT       = (Rectangle){ HEADER_INPUT_X, HEADER_RATE_INPUT_Y,   HEADER_INPUT_WIDTH, HEADER_H };
+Rectangle CHANNELS_INPUTBASE     = (Rectangle){ WIDTH-PUSH_BTN_W-50, HEADER_MASTER_Y, PUSH_BSE_W, PUSH_BSE_H };
+Rectangle CHANNELS_INPUT         = (Rectangle){ WIDTH-PUSH_BTN_W-50, HEADER_MASTER_Y, PUSH_BTN_W, PUSH_BTN_H };
+Rectangle LEFT_REEL              = (Rectangle){ LEFT_REEL_X, REEL_Y, REEL_W, REEL_H };
+Rectangle RIGHT_REEL             = (Rectangle){ RIGHT_REEL_X, REEL_Y, REEL_W, REEL_H };
+Texture2D REEL;
+float ROTATION                   = 0.;
 
 ButtonSwitch newPushButton(Rectangle bounds, Rectangle measure)
 {
@@ -37,18 +41,18 @@ void drawheader()
         // filename
         DrawRectangle(HEADER_INPUT_X, HEADER_INPUT_Y, HEADER_INPUT_WIDTH, HEADER_H, HEADER_FG_COLOR);
         DrawRectangleLines(
-                        fileNameInput.x,
-                        fileNameInput.y,
-                        fileNameInput.width,
-                        fileNameInput.height,
+                        FILENAME_INPUT.x,
+                        FILENAME_INPUT.y,
+                        FILENAME_INPUT.width,
+                        FILENAME_INPUT.height,
                         HEADER_BORDER_COLOR
         );
         // sample rate
         DrawRectangle(HEADER_INPUT_X, HEADER_RATE_INPUT_Y, HEADER_INPUT_WIDTH, HEADER_H, HEADER_FG_COLOR);
-        DrawRectangleLines(sampleRateInput.x,
-                        sampleRateInput.y,
-                        sampleRateInput.width,
-                        sampleRateInput.height,
+        DrawRectangleLines(SAMPLERATE_INPUT.x,
+                        SAMPLERATE_INPUT.y,
+                        SAMPLERATE_INPUT.width,
+                        SAMPLERATE_INPUT.height,
                         HEADER_BORDER_COLOR
         );
 }
@@ -74,16 +78,12 @@ void drawInfo(struct data *data, SF_INFO sfinfo)
 
         DrawText(master, HEADER_X, MASTER_TEXT_Y, INFO_TEXT_SIZE, BEIGE);
 
-        ButtonSwitch masterBtn = newPushButton(channelsInputBase, channelsInput);
+        ButtonSwitch masterBtn = newPushButton(CHANNELS_INPUTBASE, CHANNELS_INPUT);
         drawPushButton(masterBtn);
 }
 
 void drawController()
 {
-#define CONTROLLER_W 400
-#define CONTROLLER_H HEIGHT-TRANSPORT_H
-#define CONTROLLER_X 0
-#define CONTROLLER_Y 0
         DrawRectangle(CONTROLLER_X, CONTROLLER_Y, CONTROLLER_W, CONTROLLER_H, BLACK);
 }
 
@@ -166,6 +166,25 @@ void drawVuMeters()
 
         drawVolumeValues();
         drawInfo(&DATA, SFINFO);
+}
+
+void drawReel(Texture2D tex, Rectangle bounds)
+{
+        Vector2 origin = { bounds.width/2., bounds.height/2. };
+        DrawTexturePro(tex, (Rectangle){ 0, 0, bounds.width, bounds.height}, bounds, origin, ROTATION, WHITE);
+}
+
+void drawReels()
+{
+        drawReel(REEL, LEFT_REEL);
+        drawReel(REEL, RIGHT_REEL);
+        DrawRectangle(LEFT_REEL_X-REEL_W/2., REEL_Y-REEL_H/2., 122, 60, GetColor(0x000000AA));
+        DrawLineEx((Vector2){LEFT_REEL_X-REEL_W/2.-5, REEL_Y-REEL_H/2.},
+                        (Vector2) {LEFT_REEL_X-REEL_W/2.-5, REEL_Y+REEL_H/2.}, 2, RAYWHITE);
+        DrawLineEx((Vector2){RIGHT_REEL_X+REEL_W/2.+5, REEL_Y-REEL_H/2.},
+                        (Vector2) {RIGHT_REEL_X+REEL_W/2.+5, REEL_Y+REEL_H/2.}, 2, RAYWHITE);
+        if (transport.recTrackBtn.isPressed) ROTATION++;
+
 }
 
 TextureButton newButton(Rectangle bounds, Texture2D texture, Texture2D pressedTexture, Texture2D hoverTexture, Color tint)

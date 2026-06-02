@@ -42,6 +42,11 @@
 #define MASTER_TEXT_LENGTH      7
 #define MASTER_TEXT_Y           243+(HEADER_H*4)+12
 #define FILE_NAME_Y             HEADER_INPUT_Y+2
+/* Controller */
+#define CONTROLLER_W            400
+#define CONTROLLER_H            HEIGHT-TRANSPORT_H
+#define CONTROLLER_X            0
+#define CONTROLLER_Y            0
 /* Meters */
 #define FADER_HEIGHT            280
 #define FADER_WIDTH             30
@@ -80,6 +85,12 @@
 #define RIGHT_VOLUME_VALUE_Y    200
 #define RIGHT_VOLUME_VALUE_S    14
 #define RIGHT_VOLUME_VALUE_C    RED
+/* Reels */
+#define REEL_H                  60
+#define REEL_W                  60
+#define REEL_Y                  (HEIGHT-TRANSPORT_H) - (REEL_H/2.) - 2
+#define LEFT_REEL_X             233
+#define RIGHT_REEL_X            295
 /* Timer */
 #define TIMER_W                 120
 #define TIMER_H                 45
@@ -117,12 +128,16 @@
 #define PUSH_BSE_H              20
 #define PUSH_BSE_C              GetColor(0x333333FF)
 
-extern Rectangle fileNameInput;
-extern Rectangle sampleRateInput;
-extern Rectangle channelsInput;
-extern Rectangle channelsInputBase;
-extern Rectangle newFileInput;
-extern Rectangle saveFileInput;
+extern Rectangle FILENAME_INPUT;
+extern Rectangle SAMPLERATE_INPUT;
+extern Rectangle CHANNELS_INPUT;
+extern Rectangle CHANNELS_INPUTBASE;
+extern Rectangle NEWFILE_INPUT;
+extern Rectangle SAVEFILE_INPUT;
+extern Rectangle LEFT_REEL;
+extern Rectangle RIGHT_REEL;
+extern Texture2D REEL;
+extern float ROTATION;
 
 typedef struct TextureButton {
         Rectangle bounds;
@@ -162,6 +177,8 @@ void drawVolumeMeters(Texture2D faderTex);
 void drawVolumeValues();
 
 void drawVuMeters();
+
+void drawReels();
 
 TextureButton newButton(Rectangle bounds, Texture2D texture, Texture2D pressedTexture, Texture2D hoverTexture, Color tint);
 
