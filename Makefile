@@ -2,6 +2,8 @@ PREFIX=/usr/local
 INSTALL_DIR=$(PREFIX)/bin
 ASSETS_PREFIX=/usr/share
 ASSETS_DIR=$(ASSETS_PREFIX)/opencorder
+CONFIG_PREFIX=$(HOME)/.config
+CONFIG_DIR=$(CONFIG_PREFIX)/opencorder
 
 CC = clang
 CFLAGS = -Wall $(shell pkg-config --cflags libpipewire-0.3 libspa-0.2)
@@ -9,11 +11,16 @@ LDFLAGS = $(shell pkg-config --libs libpipewire-0.3 libspa-0.2)
 LIBS := -lm -lsndfile -lraylib
 SOURCES = corder.c pipe.c ui.c config.c
 ASSETS = assets/*
+CONFIG = templates/opencorder.conf
 OBJECTS = $(SOURCES:.c=.o)
 TARGET = corder
 
 $(TARGET): $(OBJECTS)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) $(LDFLAGS)
+
+config:
+	mkdir -p $(CONFIG_DIR)
+	install -m 0644 $(CONFIG) $(CONFIG_DIR)
 
 install:
 	mkdir -p $(ASSETS_DIR)/assets
