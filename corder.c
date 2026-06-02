@@ -85,24 +85,26 @@ int main(int argc, char *argv[])
 
         InitWindow(WIDTH, HEIGHT, "opencorder");
         SetTargetFPS(FPS);
-        Texture2D backgroundTexture = LoadTexture("/usr/share/opencorder/assets/Background.png");
-        Texture2D screenTexture     = LoadTexture("/usr/share/opencorder/assets/Screen.png");
-        Texture2D transportTexture  = LoadTexture("/usr/share/opencorder/assets/Transport.png");
-        Texture2D faderTexture      = LoadTexture("/usr/share/opencorder/assets/Fader.png");
+        Texture2D backgroundTexture     = LoadTexture("/usr/share/opencorder/assets/Background.png");
+        Texture2D screenTexture         = LoadTexture("/usr/share/opencorder/assets/Screen.png");
+        Texture2D transportTexture      = LoadTexture("/usr/share/opencorder/assets/Transport.png");
+        Texture2D faderTexture          = LoadTexture("/usr/share/opencorder/assets/Fader.png");
 
-        Texture2D armTrack          = LoadTexture("/usr/share/opencorder/assets/arm-button-t.png");
-        Texture2D armTrackPressed   = LoadTexture("/usr/share/opencorder/assets/arm-button-t-pressed.png");
-        Texture2D recTrack          = LoadTexture("/usr/share/opencorder/assets/play-button-t.png");
-        Texture2D recTrackPressed   = LoadTexture("/usr/share/opencorder/assets/play-button-t-pressed.png");
-        Texture2D stopTrack         = LoadTexture("/usr/share/opencorder/assets/stop-button-t.png");
-        Texture2D stopTrackPressed  = LoadTexture("/usr/share/opencorder/assets/stop-button-pressed.png");
-        Texture2D pauseTrack        = LoadTexture("/usr/share/opencorder/assets/pause-button-t.png");
-        Texture2D pauseTrackPressed = LoadTexture("/usr/share/opencorder/assets/pause-button-t-pressed.png");
+        Texture2D armTrack              = LoadTexture("/usr/share/opencorder/assets/arm-button-t.png");
+        Texture2D armTrackPressed       = LoadTexture("/usr/share/opencorder/assets/arm-button-t-pressed.png");
+        Texture2D recTrack              = LoadTexture("/usr/share/opencorder/assets/play-button-t.png");
+        Texture2D recTrackPressed       = LoadTexture("/usr/share/opencorder/assets/play-button-t-pressed.png");
+        Texture2D stopTrack             = LoadTexture("/usr/share/opencorder/assets/stop-button-t.png");
+        Texture2D stopTrackPressed      = LoadTexture("/usr/share/opencorder/assets/stop-button-pressed.png");
+        Texture2D pauseTrack            = LoadTexture("/usr/share/opencorder/assets/pause-button-t.png");
+        Texture2D pauseTrackPressed     = LoadTexture("/usr/share/opencorder/assets/pause-button-t-pressed.png");
 
-        Texture2D newFile           = LoadTexture("/usr/share/opencorder/assets/new-button-t.png");
-        Texture2D newFilePressed    = LoadTexture("/usr/share/opencorder/assets/new-button-t-pressed.png");
-        Texture2D saveFile          = LoadTexture("/usr/share/opencorder/assets/save-button-t.png");
-        Texture2D saveFilePressed   = LoadTexture("/usr/share/opencorder/assets/save-button-t-pressed.png");
+        Texture2D newFile               = LoadTexture("/usr/share/opencorder/assets/new-button-t.png");
+        Texture2D newFilePressed        = LoadTexture("/usr/share/opencorder/assets/new-button-t-pressed.png");
+        Texture2D saveFile              = LoadTexture("/usr/share/opencorder/assets/save-button-t.png");
+        Texture2D saveFilePressed       = LoadTexture("/usr/share/opencorder/assets/save-button-t-pressed.png");
+
+        REEL                            = LoadTexture("/usr/share/opencorder/assets/reel.png");
 
         TextureButton stopBtn   = newButton((Rectangle){ STOP_BTN_X,    HIGH_BTN_Y, BTN_W, BTN_H        },
                         stopTrack, stopTrackPressed, stopTrack, WHITE);
@@ -127,9 +129,9 @@ int main(int argc, char *argv[])
         while (!WindowShouldClose() && !GUI_DISABLE) {
                 Vector2 mousePos = GetMousePosition();
 
-                bool filenameIsHovered = CheckCollisionPointRec(mousePos, fileNameInput);
-                bool sampleRateIsHovered = CheckCollisionPointRec(mousePos, sampleRateInput);
-                bool channelsIsHovered = CheckCollisionPointRec(mousePos, channelsInputBase);
+                bool filenameIsHovered = CheckCollisionPointRec(mousePos, FILENAME_INPUT);
+                bool sampleRateIsHovered = CheckCollisionPointRec(mousePos, SAMPLERATE_INPUT);
+                bool channelsIsHovered = CheckCollisionPointRec(mousePos, CHANNELS_INPUTBASE);
 
                 transport.newFileBtn.isHovered    = CheckCollisionPointRec(mousePos, transport.newFileBtn.bounds);
                 transport.saveFileBtn.isHovered   = CheckCollisionPointRec(mousePos, transport.saveFileBtn.bounds);
@@ -173,11 +175,11 @@ int main(int argc, char *argv[])
                         switch (CHANNELS) {
                                 case STEREO:
                                 CHANNELS = MONO;
-                                channelsInput.x += 20;
+                                CHANNELS_INPUT.x += 20;
                                 break;
                                 default:
                                 CHANNELS = STEREO;
-                                channelsInput.x -= 20;
+                                CHANNELS_INPUT.x -= 20;
                                 break;
                         }
                 }
@@ -235,6 +237,8 @@ int main(int argc, char *argv[])
                         transport.recTrackBtn.isPressed = false;
                         transport.pauseTrackBtn.isPressed = false;
                         FILE_INITD = false;
+                        SAMPLE_LEFT = 0;
+                        SAMPLE_RIGHT = 0;
                 }
 
                 if (transport.newFileBtn.isHovered)
@@ -262,9 +266,9 @@ int main(int argc, char *argv[])
                 DrawTexture(backgroundTexture, 0, 0, WHITE);
                 drawController();
                 drawTransport();
-                //drawVolumeMeters(faderTexture);
                 drawVolumeValues();
                 drawVuMeters();
+                drawReels();
                 EndDrawing();
         }
 

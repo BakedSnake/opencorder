@@ -11,26 +11,26 @@
 #define SAMPLING_RATE_22K       22050
 #define SAMPLING_RATE_11K       11025
 
-extern char* PATH;
-extern char TIME[64];
-extern clock_t CLOCK;
-extern clock_t CLOCK_P;
+extern char*    PATH;
+extern char     TIME[64];
+extern clock_t  CLOCK;
+extern clock_t  CLOCK_P;
 
-extern float SAMPLE_LEFT;
-extern float SAMPLE_RIGHT;
-extern float VOL_RATIO;
+extern float    SAMPLE_LEFT;
+extern float    SAMPLE_RIGHT;
+extern float    VOL_RATIO;
 
-extern bool GUI_DISABLE;
-extern bool FILE_INITD;
-extern bool MOUSE_ON_INPUT;
+extern bool     GUI_DISABLE;
+extern bool     FILE_INITD;
+extern bool     MOUSE_ON_INPUT;
 
-extern char SEPARATOR[2];
-extern size_t CLILEN;
+extern char     SEPARATOR[2];
+extern size_t   CLILEN;
 
-extern char FNAME[MAX_FILE_CHAR+1];
-extern size_t CHAR_COUNT;
+extern char     FNAME[MAX_FILE_CHAR+1];
+extern size_t   CHAR_COUNT;
 
-static char VERSION[6] = "0.0.9";
+static char     VERSION[6] = "0.0.9";
 
 static struct option options[] = {
   {"help",              no_argument,            0, 'h'},
