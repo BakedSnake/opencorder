@@ -170,6 +170,8 @@ extern Transport transport;
 
 void drawTitle(void);
 
+void drawFilterPanel(void);
+
 void drawheader(void);
 
 void drawInfo(struct data *data, SF_INFO sfinfo);

@@ -270,6 +270,7 @@ int main(int argc, char *argv[])
                 drawVuMeters();
                 drawReels();
                 drawTitle();
+                drawFilterPanel();
                 EndDrawing();
         }
 

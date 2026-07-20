@@ -34,6 +34,14 @@ void drawTitle(void)
     char title[24];
     snprintf(title, 24, "Opencorder v%s", VERSION);
     DrawText(title, 5, 5, 16, RAYWHITE);
+    DrawLine(3, 24, CONTROLLER_W, 24, RAYWHITE);
+}
+
+void drawFilterPanel(void)
+{
+    DrawLineEx((Vector2){5, 90},(Vector2){CONTROLLER_W, 90}, 2, RAYWHITE);
+    DrawCircle(CONTROLLER_W-40, 55, 20, DARKGRAY);
+    DrawCircle(CONTROLLER_W-40, 68, 3, BLACK);
 }
 
 void drawheader(void)
