@@ -29,7 +29,14 @@ void drawPushButton(ButtonSwitch btn)
         DrawRectangle(btn.measure.x, btn.measure.y, PUSH_BTN_W, PUSH_BTN_H, PUSH_BTN_C);
 }
 
-void drawheader()
+void drawTitle(void)
+{
+    char title[24];
+    snprintf(title, 24, "Opencorder v%s", VERSION);
+    DrawText(title, 5, 5, 16, RAYWHITE);
+}
+
+void drawheader(void)
 {
         DrawRectangle(HEADER_X, HEADER_FILE_Y, HEADER_W, HEADER_H, HEADER_BG_COLOR);
         DrawRectangleLines(HEADER_X, HEADER_FILE_Y, HEADER_W, HEADER_H, HEADER_BG_COLOR);
@@ -82,12 +89,12 @@ void drawInfo(struct data *data, SF_INFO sfinfo)
         drawPushButton(masterBtn);
 }
 
-void drawController()
+void drawController(void)
 {
         DrawRectangle(CONTROLLER_X, CONTROLLER_Y, CONTROLLER_W, CONTROLLER_H, BLACK);
 }
 
-void drawVolumeSection()
+void drawVolumeSection(void)
 {
         DrawRectangle(WIDTH-200, 0, 200, HEIGHT, BLACK);
         DrawLineEx((Vector2){WIDTH-200, 5}, (Vector2){WIDTH-200, HEIGHT-5}, 2, RAYWHITE);
@@ -114,7 +121,7 @@ void drawVolumeMeters(Texture2D faderTex)
         DrawRectangleLines(LEFT_FADER_X, FADER_Y, FADER_WIDTH, FADER_HEIGHT, FADER_LINE_COLOR);
 }
 
-void drawVolumeValues()
+void drawVolumeValues(void)
 {
         char* left = malloc(sizeof(SAMPLE_LEFT));
         char* right = malloc(sizeof(SAMPLE_RIGHT));
@@ -129,7 +136,7 @@ void drawVolumeValues()
         free(right);
 }
 
-void drawVuMeters()
+void drawVuMeters(void)
 {
         drawVolumeSection();
         DrawRectangle(LEFT_VU_X, LEFT_VU_Y, VU_W, VU_H, RAYWHITE);
@@ -174,7 +181,7 @@ void drawReel(Texture2D tex, Rectangle bounds)
         DrawTexturePro(tex, (Rectangle){ 0, 0, bounds.width, bounds.height}, bounds, origin, ROTATION, WHITE);
 }
 
-void drawReels()
+void drawReels(void)
 {
         drawReel(REEL, LEFT_REEL);
         drawReel(REEL, RIGHT_REEL);
@@ -202,7 +209,7 @@ TextureButton newButton(Rectangle bounds, Texture2D texture, Texture2D pressedTe
         return new;
 }
 
-void drawTransportControls()
+void drawTransportControls(void)
 {
         Texture2D currArmTrackTexture = transport.armTrackBtn.texture;
         if (transport.armTrackBtn.isPressed)
@@ -248,7 +255,7 @@ void drawTransportControls()
         DrawTextureEx(currPauseTrackTexture,    (Vector2){PAUSE_BTN_X,  HIGH_BTN_Y}, .0f, BTN_SCALE, WHITE);
 }
 
-void drawTimer()
+void drawTimer(void)
 {
         DrawRectangle(TIMER_X, TIMER_Y, TIMER_W, TIMER_H, TIMER_C);
         if (transport.recTrackBtn.isPressed) {
@@ -272,7 +279,7 @@ void drawTimer()
         }
 }
 
-void drawTransport()
+void drawTransport(void)
 {
         DrawRectangle(TRANSPORT_X, TRANSPORT_Y, TRANSPORT_W, TRANSPORT_H, BLACK);
         DrawLineEx((Vector2){TRANSPORT_X+5, TRANSPORT_Y}, (Vector2){400, TRANSPORT_Y}, 2, RAYWHITE);
@@ -280,7 +287,7 @@ void drawTransport()
         drawTimer();
 }
 
-void updateFileName()
+void updateFileName(void)
 {
         SetMouseCursor(MOUSE_CURSOR_IBEAM);
         int key = GetCharPressed();

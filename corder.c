@@ -269,6 +269,7 @@ int main(int argc, char *argv[])
                 drawVolumeValues();
                 drawVuMeters();
                 drawReels();
+                drawTitle();
                 EndDrawing();
         }
 

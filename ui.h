@@ -168,24 +168,26 @@ typedef struct Transport {
 
 extern Transport transport;
 
-void drawheader();
+void drawTitle(void);
+
+void drawheader(void);
 
 void drawInfo(struct data *data, SF_INFO sfinfo);
 
 void drawVolumeMeters(Texture2D faderTex);
 
-void drawVolumeValues();
+void drawVolumeValues(void);
 
-void drawVuMeters();
+void drawVuMeters(void);
 
-void drawReels();
+void drawReels(void);
 
 TextureButton newButton(Rectangle bounds, Texture2D texture, Texture2D pressedTexture, Texture2D hoverTexture, Color tint);
 
-void drawTransportControls();
+void drawTransportControls(void);
 
-void drawTransport();
+void drawTransport(void);
 
-void drawController();
+void drawController(void);
 
-void updateFileName();
+void updateFileName(void);
