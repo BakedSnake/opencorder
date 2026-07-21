@@ -154,9 +154,12 @@ extern Rectangle SAVEFILE_INPUT;
 extern Rectangle LEFT_REEL;
 extern Rectangle RIGHT_REEL;
 extern Texture2D REEL;
-extern Texture2D LOWPASS;
-extern Texture2D MIDPASS;
-extern Texture2D HIHPASS;
+extern Texture2D LOWPASS_BTN_TEX;
+extern Texture2D LOWPASS_BTN_TEX_PRESSED;
+extern Texture2D MIDPASS_BTN_TEX;
+extern Texture2D MIDPASS_BTN_TEX_PRESSED;
+extern Texture2D HIHPASS_BTN_TEX;
+extern Texture2D HIHPASS_BTN_TEX_PRESSED;
 extern float ROTATION;
 
 typedef struct TextureButton {
