@@ -128,6 +128,23 @@
 #define PUSH_BSE_H              20
 #define PUSH_BSE_C              GetColor(0x333333FF)
 
+/* Filter */
+#define FLT_BTN_Y               40
+#define LF_BTN_X                5
+#define MF_BTN_X                55
+#define HF_BTN_X                105
+#define FLT_SEP_X               5
+#define FLT_SEP_Y               90
+#define FLT_SEP_W               CONTROLLER_W
+#define FLT_SEP_T               2
+#define FLT_WHEEL_X             FLT_SEP_W-40
+#define FLT_WHEEL_Y             55
+#define FLT_WHEEL_S             20
+#define FLT_WHEEL_S             20
+#define FLT_WHEEL_M_X           FLT_SEP_W-40
+#define FLT_WHEEL_M_Y           68
+#define FLT_WHEEL_M_S           3
+
 extern Rectangle FILENAME_INPUT;
 extern Rectangle SAMPLERATE_INPUT;
 extern Rectangle CHANNELS_INPUT;
@@ -137,6 +154,9 @@ extern Rectangle SAVEFILE_INPUT;
 extern Rectangle LEFT_REEL;
 extern Rectangle RIGHT_REEL;
 extern Texture2D REEL;
+extern Texture2D LOWPASS;
+extern Texture2D MIDPASS;
+extern Texture2D HIHPASS;
 extern float ROTATION;
 
 typedef struct TextureButton {

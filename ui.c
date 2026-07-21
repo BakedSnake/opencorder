@@ -15,6 +15,9 @@ Rectangle CHANNELS_INPUT         = (Rectangle){ WIDTH-PUSH_BTN_W-50, HEADER_MAST
 Rectangle LEFT_REEL              = (Rectangle){ LEFT_REEL_X, REEL_Y, REEL_W, REEL_H };
 Rectangle RIGHT_REEL             = (Rectangle){ RIGHT_REEL_X, REEL_Y, REEL_W, REEL_H };
 Texture2D REEL;
+Texture2D LOWPASS;
+Texture2D MIDPASS;
+Texture2D HIHPASS;
 float ROTATION                   = 0.;
 
 ButtonSwitch newPushButton(Rectangle bounds, Rectangle measure)
@@ -39,9 +42,12 @@ void drawTitle(void)
 
 void drawFilterPanel(void)
 {
-    DrawLineEx((Vector2){5, 90},(Vector2){CONTROLLER_W, 90}, 2, RAYWHITE);
-    DrawCircle(CONTROLLER_W-40, 55, 20, DARKGRAY);
-    DrawCircle(CONTROLLER_W-40, 68, 3, BLACK);
+    DrawLineEx((Vector2){FLT_SEP_X, FLT_SEP_Y},(Vector2){FLT_SEP_W, FLT_SEP_Y}, FLT_SEP_T, RAYWHITE);
+    DrawTextureEx(LOWPASS, (Vector2){LF_BTN_X, FLT_BTN_Y}, .0f, BTN_SCALE, WHITE);
+    DrawTextureEx(MIDPASS, (Vector2){MF_BTN_X, FLT_BTN_Y}, .0f, BTN_SCALE, WHITE);
+    DrawTextureEx(HIHPASS, (Vector2){HF_BTN_X, FLT_BTN_Y}, .0f, BTN_SCALE, WHITE);
+    DrawCircle(FLT_WHEEL_X, FLT_WHEEL_Y, FLT_WHEEL_S, DARKGRAY);
+    DrawCircle(FLT_WHEEL_M_X, FLT_WHEEL_M_Y, FLT_WHEEL_M_S, BLACK);
 }
 
 void drawheader(void)
