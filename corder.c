@@ -104,6 +104,10 @@ int main(int argc, char *argv[])
         Texture2D saveFile              = LoadTexture("/usr/share/opencorder/assets/save-button-t.png");
         Texture2D saveFilePressed       = LoadTexture("/usr/share/opencorder/assets/save-button-t-pressed.png");
 
+        LOWPASS                         = LoadTexture("/usr/share/opencorder/assets/low-pass-button.png");
+        MIDPASS                         = LoadTexture("/usr/share/opencorder/assets/mid-pass-button.png");
+        HIHPASS                         = LoadTexture("/usr/share/opencorder/assets/hi-pass-button.png");
+
         REEL                            = LoadTexture("/usr/share/opencorder/assets/reel.png");
 
         TextureButton stopBtn   = newButton((Rectangle){ STOP_BTN_X,    HIGH_BTN_Y, BTN_W, BTN_H        },
@@ -118,6 +122,13 @@ int main(int argc, char *argv[])
                         newFile, newFilePressed, newFile, WHITE);
         TextureButton saveBtn   = newButton((Rectangle){ SAVE_BTN_X,    SAVE_BTN_Y, BTN_W,  SMALL_BTN_H  },
                         saveFile, saveFilePressed, saveFile, WHITE);
+
+        TextureButton lopaBtn   = newButton((Rectangle){ LF_BTN_X, FLT_BTN_Y, BTN_W, BTN_H },
+                LOWPASS, LOWPASS, LOWPASS, WHITE);
+        TextureButton mipaBtn   = newButton((Rectangle){ MF_BTN_X, FLT_BTN_Y, BTN_W, BTN_H },
+                MIDPASS, MIDPASS, MIDPASS, WHITE);
+        TextureButton hipaBtn   = newButton((Rectangle){ HF_BTN_X, FLT_BTN_Y, BTN_W, BTN_H },
+                HIHPASS, HIHPASS, HIHPASS, WHITE);
 
         transport.stopTrackBtn  = stopBtn;
         transport.armTrackBtn   = armBtn;
