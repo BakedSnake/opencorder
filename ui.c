@@ -45,10 +45,28 @@ void drawTitle(void)
 
 void drawFilterPanel(void)
 {
+    Texture2D currLoFbTexture = filter.loPassBtn.texture;
+    if (filter.loPassBtn.isHovered)
+            currLoFbTexture = filter.loPassBtn.pressedTexture;
+    else if (transport.armTrackBtn.isHovered)
+            currLoFbTexture = filter.loPassBtn.hoverTexture;
+
+    Texture2D currMiFbTexture = filter.miPassBtn.texture;
+    if (filter.miPassBtn.isHovered)
+            currMiFbTexture = filter.miPassBtn.pressedTexture;
+    else if (transport.armTrackBtn.isHovered)
+            currMiFbTexture = filter.miPassBtn.hoverTexture;
+
+    Texture2D currHiFbTexture = filter.hiPassBtn.texture;
+    if (filter.hiPassBtn.isHovered)
+            currHiFbTexture = filter.hiPassBtn.pressedTexture;
+    else if (transport.armTrackBtn.isHovered)
+            currHiFbTexture = filter.hiPassBtn.hoverTexture;
+
     DrawLineEx((Vector2){FLT_SEP_X, FLT_SEP_Y},(Vector2){FLT_SEP_W, FLT_SEP_Y}, FLT_SEP_T, RAYWHITE);
-    DrawTextureEx(LOWPASS_BTN_TEX, (Vector2){LF_BTN_X, FLT_BTN_Y}, .0f, BTN_SCALE, WHITE);
-    DrawTextureEx(MIDPASS_BTN_TEX, (Vector2){MF_BTN_X, FLT_BTN_Y}, .0f, BTN_SCALE, WHITE);
-    DrawTextureEx(HIHPASS_BTN_TEX, (Vector2){HF_BTN_X, FLT_BTN_Y}, .0f, BTN_SCALE, WHITE);
+    DrawTextureEx(currLoFbTexture, (Vector2){LF_BTN_X, FLT_BTN_Y}, .0f, BTN_SCALE, WHITE);
+    DrawTextureEx(currMiFbTexture, (Vector2){MF_BTN_X, FLT_BTN_Y}, .0f, BTN_SCALE, WHITE);
+    DrawTextureEx(currHiFbTexture, (Vector2){HF_BTN_X, FLT_BTN_Y}, .0f, BTN_SCALE, WHITE);
     DrawCircle(FLT_WHEEL_X, FLT_WHEEL_Y, FLT_WHEEL_S, DARKGRAY);
     DrawCircle(FLT_WHEEL_M_X, FLT_WHEEL_M_Y, FLT_WHEEL_M_S, BLACK);
 }
