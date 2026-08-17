@@ -191,6 +191,14 @@ typedef struct Transport {
 
 extern Transport transport;
 
+typedef struct Filter {
+    TextureButton loPassBtn;
+    TextureButton miPassBtn;
+    TextureButton hiPassBtn;
+} Filter;
+
+extern Filter filter;
+
 void drawTitle(void);
 
 void drawFilterPanel(void);
@@ -207,7 +215,8 @@ void drawVuMeters(void);
 
 void drawReels(void);
 
-TextureButton newButton(Rectangle bounds, Texture2D texture, Texture2D pressedTexture, Texture2D hoverTexture, Color tint);
+TextureButton newButton(Rectangle bounds, Texture2D texture,
+        Texture2D pressedTexture, Texture2D hoverTexture, Color tint);
 
 void drawTransportControls(void);
 
