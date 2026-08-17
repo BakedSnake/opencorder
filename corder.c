@@ -37,6 +37,7 @@ int rc;
 pthread_t guiThread;
 pthread_t pipeThread;
 Transport transport;
+Filter filter;
 
 void sndFileInit(char* rateStr)
 {
@@ -110,7 +111,7 @@ int main(int argc, char *argv[])
         LOWPASS_BTN_TEX                 = LoadTexture("/usr/share/opencorder/assets/low-pass-button.png");
         LOWPASS_BTN_TEX_PRESSED         = LoadTexture("/usr/share/opencorder/assets/low-pass-button-pressed.png");
         MIDPASS_BTN_TEX                 = LoadTexture("/usr/share/opencorder/assets/mid-pass-button.png");
-        MIDPASS_BTN_TEX_PRESSED         = LoadTexture("/usr/share/opencorder/assets/nid-pass-button-pressed.png");
+        MIDPASS_BTN_TEX_PRESSED         = LoadTexture("/usr/share/opencorder/assets/mid-pass-button-pressed.png");
         HIHPASS_BTN_TEX                 = LoadTexture("/usr/share/opencorder/assets/high-pass-button.png");
         HIHPASS_BTN_TEX_PRESSED         = LoadTexture("/usr/share/opencorder/assets/hi-pass-button-pressed.png");
 
@@ -290,15 +291,27 @@ int main(int argc, char *argv[])
                 }
 
                 if (filter.loPassBtn.isHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                    if (filter.loPassBtn.isPressed) {
+                        filter.loPassBtn.isPressed = false;
+                    } else {
                         filter.loPassBtn.isPressed = true;
+                    }
                 }
 
                 if (filter.miPassBtn.isHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                    if (filter.miPassBtn.isPressed) {
+                        filter.miPassBtn.isPressed = false;
+                    } else {
                         filter.miPassBtn.isPressed = true;
+                    }
                 }
 
                 if (filter.hiPassBtn.isHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                    if (filter.hiPassBtn.isPressed) {
+                        filter.hiPassBtn.isPressed = false;
+                    } else {
                         filter.hiPassBtn.isPressed = true;
+                    }
                 }
 
                 BeginDrawing();
