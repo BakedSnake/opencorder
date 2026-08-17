@@ -46,21 +46,21 @@ void drawTitle(void)
 void drawFilterPanel(void)
 {
     Texture2D currLoFbTexture = filter.loPassBtn.texture;
-    if (filter.loPassBtn.isHovered)
+    if (filter.loPassBtn.isPressed)
             currLoFbTexture = filter.loPassBtn.pressedTexture;
-    else if (transport.armTrackBtn.isHovered)
+    else if (filter.loPassBtn.isHovered)
             currLoFbTexture = filter.loPassBtn.hoverTexture;
 
     Texture2D currMiFbTexture = filter.miPassBtn.texture;
-    if (filter.miPassBtn.isHovered)
+    if (filter.miPassBtn.isPressed)
             currMiFbTexture = filter.miPassBtn.pressedTexture;
-    else if (transport.armTrackBtn.isHovered)
+    else if (filter.miPassBtn.isHovered)
             currMiFbTexture = filter.miPassBtn.hoverTexture;
 
     Texture2D currHiFbTexture = filter.hiPassBtn.texture;
-    if (filter.hiPassBtn.isHovered)
+    if (filter.hiPassBtn.isPressed)
             currHiFbTexture = filter.hiPassBtn.pressedTexture;
-    else if (transport.armTrackBtn.isHovered)
+    else if (filter.hiPassBtn.isHovered)
             currHiFbTexture = filter.hiPassBtn.hoverTexture;
 
     DrawLineEx((Vector2){FLT_SEP_X, FLT_SEP_Y},(Vector2){FLT_SEP_W, FLT_SEP_Y}, FLT_SEP_T, RAYWHITE);
