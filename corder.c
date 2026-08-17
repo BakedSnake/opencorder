@@ -85,11 +85,13 @@ int main(int argc, char *argv[])
 
         InitWindow(WIDTH, HEIGHT, "opencorder");
         SetTargetFPS(FPS);
+
         Texture2D backgroundTexture     = LoadTexture("/usr/share/opencorder/assets/Background.png");
         Texture2D screenTexture         = LoadTexture("/usr/share/opencorder/assets/Screen.png");
         Texture2D transportTexture      = LoadTexture("/usr/share/opencorder/assets/Transport.png");
         Texture2D faderTexture          = LoadTexture("/usr/share/opencorder/assets/Fader.png");
 
+        // Transport button textures
         Texture2D armTrack              = LoadTexture("/usr/share/opencorder/assets/arm-button-t.png");
         Texture2D armTrackPressed       = LoadTexture("/usr/share/opencorder/assets/arm-button-t-pressed.png");
         Texture2D recTrack              = LoadTexture("/usr/share/opencorder/assets/play-button-t.png");
@@ -104,6 +106,7 @@ int main(int argc, char *argv[])
         Texture2D saveFile              = LoadTexture("/usr/share/opencorder/assets/save-button-t.png");
         Texture2D saveFilePressed       = LoadTexture("/usr/share/opencorder/assets/save-button-t-pressed.png");
 
+        // Filter button textures
         LOWPASS_BTN_TEX                 = LoadTexture("/usr/share/opencorder/assets/low-pass-button.png");
         LOWPASS_BTN_TEX_PRESSED         = LoadTexture("/usr/share/opencorder/assets/low-pass-button-pressed.png");
         MIDPASS_BTN_TEX                 = LoadTexture("/usr/share/opencorder/assets/mid-pass-button.png");
@@ -113,7 +116,7 @@ int main(int argc, char *argv[])
 
         REEL                            = LoadTexture("/usr/share/opencorder/assets/reel.png");
 
-        // Transport button textures
+        // Transport buttons
         TextureButton stopBtn   = newButton((Rectangle){ STOP_BTN_X,    HIGH_BTN_Y, BTN_W, BTN_H        },
                         stopTrack, stopTrackPressed, stopTrack, WHITE);
         TextureButton armBtn    = newButton((Rectangle){ ARM_BTN_X,     HIGH_BTN_Y, BTN_W, BTN_H        },
@@ -134,7 +137,7 @@ int main(int argc, char *argv[])
         transport.saveFileBtn   = saveBtn;
         transport.newFileBtn    = newBtn;
 
-        // Filter button textures
+        // Filter buttons
         TextureButton lopaBtn   = newButton((Rectangle){ LF_BTN_X, FLT_BTN_Y, BTN_W, BTN_H },
                 LOWPASS_BTN_TEX, LOWPASS_BTN_TEX_PRESSED, LOWPASS_BTN_TEX, WHITE);
         TextureButton mipaBtn   = newButton((Rectangle){ MF_BTN_X, FLT_BTN_Y, BTN_W, BTN_H },
@@ -142,24 +145,33 @@ int main(int argc, char *argv[])
         TextureButton hipaBtn   = newButton((Rectangle){ HF_BTN_X, FLT_BTN_Y, BTN_W, BTN_H },
                 HIHPASS_BTN_TEX, HIHPASS_BTN_TEX_PRESSED, HIHPASS_BTN_TEX, WHITE);
 
+        // Set filter buttons
+        filter.loPassBtn        = lopaBtn;
+        filter.miPassBtn        = mipaBtn;
+        filter.hiPassBtn        = hipaBtn;
+
         while (!WindowShouldClose() && !GUI_DISABLE) {
                 Vector2 mousePos = GetMousePosition();
 
-                bool filenameIsHovered = CheckCollisionPointRec(mousePos, FILENAME_INPUT);
-                bool sampleRateIsHovered = CheckCollisionPointRec(mousePos, SAMPLERATE_INPUT);
-                bool channelsIsHovered = CheckCollisionPointRec(mousePos, CHANNELS_INPUTBASE);
+                bool filenameIsHovered              = CheckCollisionPointRec(mousePos, FILENAME_INPUT);
+                bool sampleRateIsHovered            = CheckCollisionPointRec(mousePos, SAMPLERATE_INPUT);
+                bool channelsIsHovered              = CheckCollisionPointRec(mousePos, CHANNELS_INPUTBASE);
 
-                transport.newFileBtn.isHovered    = CheckCollisionPointRec(mousePos, transport.newFileBtn.bounds);
-                transport.saveFileBtn.isHovered   = CheckCollisionPointRec(mousePos, transport.saveFileBtn.bounds);
-                transport.pauseTrackBtn.isHovered = CheckCollisionPointRec(mousePos, transport.pauseTrackBtn.bounds);
-                transport.armTrackBtn.isHovered   = CheckCollisionPointRec(mousePos, transport.armTrackBtn.bounds);
-                transport.recTrackBtn.isHovered   = CheckCollisionPointRec(mousePos, transport.recTrackBtn.bounds);
-                transport.stopTrackBtn.isHovered  = CheckCollisionPointRec(mousePos, transport.stopTrackBtn.bounds);
-                transport.newFileBtn.isHovered    = CheckCollisionPointRec(mousePos, transport.newFileBtn.bounds);
-                transport.saveFileBtn.isHovered   = CheckCollisionPointRec(mousePos, transport.saveFileBtn.bounds);
-                transport.stopTrackBtn.isPressed  = false;
-                transport.saveFileBtn.isPressed   = false;
-                transport.newFileBtn.isPressed    = false;
+                transport.newFileBtn.isHovered      = CheckCollisionPointRec(mousePos, transport.newFileBtn.bounds);
+                transport.saveFileBtn.isHovered     = CheckCollisionPointRec(mousePos, transport.saveFileBtn.bounds);
+                transport.pauseTrackBtn.isHovered   = CheckCollisionPointRec(mousePos, transport.pauseTrackBtn.bounds);
+                transport.armTrackBtn.isHovered     = CheckCollisionPointRec(mousePos, transport.armTrackBtn.bounds);
+                transport.recTrackBtn.isHovered     = CheckCollisionPointRec(mousePos, transport.recTrackBtn.bounds);
+                transport.stopTrackBtn.isHovered    = CheckCollisionPointRec(mousePos, transport.stopTrackBtn.bounds);
+                transport.newFileBtn.isHovered      = CheckCollisionPointRec(mousePos, transport.newFileBtn.bounds);
+                transport.saveFileBtn.isHovered     = CheckCollisionPointRec(mousePos, transport.saveFileBtn.bounds);
+                transport.stopTrackBtn.isPressed    = false;
+                transport.saveFileBtn.isPressed     = false;
+                transport.newFileBtn.isPressed      = false;
+
+                filter.loPassBtn.isHovered          = CheckCollisionPointRec(mousePos, filter.loPassBtn.bounds);
+                filter.miPassBtn.isHovered          = CheckCollisionPointRec(mousePos, filter.miPassBtn.bounds);
+                filter.hiPassBtn.isHovered          = CheckCollisionPointRec(mousePos, filter.hiPassBtn.bounds);
 
                 if (filenameIsHovered) updateFileName();
                 else SetMouseCursor(MOUSE_CURSOR_DEFAULT);
@@ -275,6 +287,18 @@ int main(int argc, char *argv[])
 
                 if (transport.saveFileBtn.isHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                         transport.saveFileBtn.isPressed = true;
+                }
+
+                if (filter.loPassBtn.isHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                        filter.loPassBtn.isPressed = true;
+                }
+
+                if (filter.miPassBtn.isHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                        filter.miPassBtn.isPressed = true;
+                }
+
+                if (filter.hiPassBtn.isHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                        filter.hiPassBtn.isPressed = true;
                 }
 
                 BeginDrawing();
